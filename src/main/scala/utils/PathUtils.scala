@@ -9,6 +9,7 @@ import org.joda.time.{DateTime, Days}
   * Created by liyun on 12/12/2017.
   */
 object PathUtils {
+  val download_history_path = "/user/h_misearch/appmarket/pipeline_data/app_ctr/download_history.txt"
   val base_path                          = "/user/h_data_platform/platform/miuiads/appstore_search/rank"
   val appstore_content_stats_path        = "/user/h_data_platform/platform/appstore/appstore_content_statistics"
   val appstore_pv_path                   = "/user/h_data_platform/platform/appstore/appstore_pv_statistics"
