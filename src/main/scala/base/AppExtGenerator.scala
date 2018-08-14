@@ -19,31 +19,43 @@ object AppExtGenerator {
 
   def main(mainArgs: Array[String]): Unit = {
     val args = Args(mainArgs)
+    val dev   = args.getOrElse("dev", "false").toBoolean
     val yday   = semanticDate(args.getOrElse("yday", "-1"))
     val month = semanticDate(args.getOrElse("month", "-30"))
 
-    val appExtPath = base_path + "/appBase"
-
-    val conf = new SparkConf()
-      .setAppName("App Ext Job")
+    var lastMonthLog = IntermediateDateIntervalPath(appstore_content_stats_path, month, yday)
+    var appDataPath = app_data_parquet_path
+    var appExtOutputPath = app_ext_parquet_path
+    var conf = new SparkConf()
+      .setAppName(AppExtGenerator.getClass.getName)
       .set("spark.sql.parquet.compression.codec", "snappy")
+
+    if (dev) {
+      lastMonthLog = Seq(appstore_content_stats_path_local)
+      appDataPath = app_data_parquet_path_local
+      appExtOutputPath = app_ext_parquet_path_local
+
+      conf = new SparkConf()
+        .setMaster("local[*]")
+        .setAppName(AppExtGenerator.getClass.getName)
+        .set("spark.sql.parquet.compression.codec", "snappy")
+    }
 
     val spark = SparkSession
       .builder()
       .config(conf)
       .getOrCreate()
 
-    val lastMonth   = IntermediateDateIntervalPath(appstore_content_stats_path, month, yday)
-    val coClickQueries = calcCoClickQueryTfIdf(spark, lastMonth)
+    val coClickQueries = calcCoClickQueryTfIdf(spark, lastMonthLog)
 
     import spark.implicits._
-    val apps = spark.read.parquet(app_data_parquet_path).as[App].rdd
+    val apps = spark.read.parquet(appDataPath).as[App].rdd
 
     val appExts = generate(spark, apps, coClickQueries)
-    if (appExts.count() > 50000) {
+    if (appExts.count() > 1000) {
       val fs = FileSystem.get(new Configuration())
-      fs.delete(new Path(appExtPath), true)
-      appExts.saveAsParquetFile(appExtPath)
+      fs.delete(new Path(appExtOutputPath), true)
+      appExts.saveAsParquetFile(appExtOutputPath)
     }
     spark.stop()
   }

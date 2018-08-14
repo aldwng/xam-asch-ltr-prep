@@ -15,8 +15,13 @@ object PathUtils {
   val app_data_parquet_path = base_path + "/base/app"
   val app_data_parquet_path_local = base_path_local + "/base/app"
 
+  val app_ext_parquet_path = base_path + "/base/app_ext"
+  val app_ext_parquet_path_local = base_path_local + "/base/app_ext"
+
+  val appstore_content_stats_path = "/user/h_data_platform/platform/appstore/appstore_content_statistics"
+  val appstore_content_stats_path_local = base_path_local + "/stats/content"
+
   val download_history_path = "/user/h_misearch/appmarket/pipeline_data/app_ctr/download_history.txt"
-  val appstore_content_stats_path        = "/user/h_data_platform/platform/appstore/appstore_content_statistics"
   val appstore_pv_path                   = "/user/h_data_platform/platform/appstore/appstore_pv_statistics"
   val app_active_log_path                = "/user/h_data_platform/platform/appstore/app_active_log_info"
   val app_tags_path                      = "matrix/relevance/app_tags"

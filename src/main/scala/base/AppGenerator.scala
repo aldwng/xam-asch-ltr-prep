@@ -18,7 +18,9 @@ object AppGenerator {
     if (dev) {
       inputPath = app_data_path_local
       outputPath = app_data_parquet_path_local
-      conf = new SparkConf().setMaster("local[*]").setAppName(AppGenerator.getClass.getName)
+      conf = new SparkConf()
+        .setMaster("local[*]")
+        .setAppName(AppGenerator.getClass.getName)
     }
 
     val spark = SparkSession
