@@ -1,8 +1,8 @@
 package features
 
+import com.xiaomi.misearch.appsearch.rank.group.FeaGroup
 import com.xiaomi.miui.ad.appstore.feature.{BaseFea, QueryExtItem, RankInstance}
-import com.xiaomi.miui.ad.relevance.core.{Jaccard, SorensenDice}
-import group.FeaGroup
+import com.xiaomi.misearch.appsearch.rank.similarity.impl.{Jaccard, SorensenDice}
 import utils.FeaUtils._
 
 import scala.collection.JavaConverters._

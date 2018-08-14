@@ -107,6 +107,7 @@ object QueryExtGenerator {
 
     val broadCastedAppNameToTagsMap = spark.sparkContext.broadcast(appNameToTagsMap)
 
+    import spark.implicits._
     val data = spark.read
       .parquet(inputPaths: _*)
       .as[AppStoreContentStatistics]

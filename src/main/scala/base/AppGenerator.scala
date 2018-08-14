@@ -2,26 +2,32 @@ package base
 
 import com.twitter.scalding.Args
 import model.App
-import org.apache.spark.SparkConf
+import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.{SaveMode, SparkSession}
 import utils.PathUtils._
 
 object AppGenerator {
 
   def main(mainArgs: Array[String]): Unit = {
-    val args      = Args(mainArgs)
-    val day       = semanticDate(args.getOrElse("day", "-1"))
-    val inputPath = RawDatePath(app_data_path, day.toInt)
+    val args = Args(mainArgs)
+    val dev   = args.getOrElse("dev", "false").toBoolean
 
-    val conf = new SparkConf()
-      .setAppName("App Data Job")
-      .set("spark.sql.parquet.compression.codec", "snappy")
+    var inputPath = app_data_path
+    var outputPath = app_data_parquet_path
+    var conf = new SparkConf().setAppName(AppGenerator.getClass.getName).set("spark.sql.parquet.compression.codec", "snappy")
+    if (dev) {
+      inputPath = app_data_path_local
+      outputPath = app_data_parquet_path_local
+      conf = new SparkConf().setMaster("local[*]").setAppName(AppGenerator.getClass.getName)
+    }
 
-    val spark = SparkSession
-      .builder()
-      .config(conf)
-      .getOrCreate()
-    val sc = spark.sparkContext
+//    val spark = SparkSession
+//      .builder()
+//      .config(conf)
+//      .getOrCreate()
+//    var sc = spark.sparkContext
+
+    val sc = new SparkContext(conf)
 
     val apps = sc
       .textFile(inputPath)
@@ -42,10 +48,10 @@ object AppGenerator {
       }
       .map(_._2)
 
-    if(apps.count > 50000){
-      import spark.implicits._
-      apps.toDF().write.mode(SaveMode.Overwrite).parquet(app_data_parquet_path)
+    if (apps.count > 50000) {
+//      import spark.implicits._
+//      apps.toDF().write.mode(SaveMode.Overwrite).parquet(outputPath)
     }
-    spark.stop()
+//    spark.stop()
   }
 }

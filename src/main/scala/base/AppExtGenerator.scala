@@ -36,9 +36,10 @@ object AppExtGenerator {
     val lastMonth   = IntermediateDateIntervalPath(appstore_content_stats_path, month, yday)
     val coClickQueries = calcCoClickQueryTfIdf(spark, lastMonth)
 
+    import spark.implicits._
     val apps = spark.read.parquet(app_data_parquet_path).as[App].rdd
-    val appExts = generate(spark, apps, coClickQueries)
 
+    val appExts = generate(spark, apps, coClickQueries)
     if (appExts.count() > 50000) {
       val fs = FileSystem.get(new Configuration())
       fs.delete(new Path(appExtPath), true)

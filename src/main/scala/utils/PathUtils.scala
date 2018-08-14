@@ -4,13 +4,18 @@ import java.nio.file.Paths
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{DateTime, Days}
 
-
-/**
-  * Created by liyun on 12/12/2017.
-  */
 object PathUtils {
+
+  val base_path = "/user/h_misearch/appmarket/rank"
+  val base_path_local = "/tmp/appsearch"
+
+  val app_data_parquet_path = base_path + "/base/app"
+  val app_data_parquet_path_local = base_path_local + "/base/app"
+
+  val app_data_path = "/user/h_misearch/appmarket/pipeline_data/app_common/app_common.txt"
+  val app_data_path_local = base_path_local + "/base/app_common.txt"
+
   val download_history_path = "/user/h_misearch/appmarket/pipeline_data/app_ctr/download_history.txt"
-  val base_path                          = "/user/h_data_platform/platform/miuiads/appstore_search/rank"
   val appstore_content_stats_path        = "/user/h_data_platform/platform/appstore/appstore_content_statistics"
   val appstore_pv_path                   = "/user/h_data_platform/platform/appstore/appstore_pv_statistics"
   val app_active_log_path                = "/user/h_data_platform/platform/appstore/app_active_log_info"
@@ -29,8 +34,7 @@ object PathUtils {
 
   val app_info_path         = "/user/h_data_platform/platform/appstore/appstore_appinfo/data/appinfo_to_hive_CN.txt"
   val app_info_parquet_path = "matrix/relevance/all_app"
-  val app_data_parquet_path = "matrix/relevance/app_data"
-  val app_data_path         = "/user/h_misearch/appmarket/app_data"
+
 
   val filter_black_list = "matrix/relevance/filter/black_list"
   val filter_white_list ="matrix/relevance/filter/white_list"
@@ -147,5 +151,4 @@ object PathUtils {
   def IntermediateDatePath(path: String, date: Int): String = {
     IntermediateDateIntervalPath(path, date.toString, date.toString).head
   }
-
 }

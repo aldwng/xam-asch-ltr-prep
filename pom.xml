@@ -17,136 +17,245 @@
         <log4j2.version>2.11.0</log4j2.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.xiaomi.data</groupId>
+                <artifactId>data-platform-spec-miuiads</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.xiaomi.data</groupId>
+                <artifactId>commons-spark</artifactId>
+                <version>0.16.5.3</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.spark</groupId>
+                        <artifactId>spark-core_2.10</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-core_${scala.version.major}</artifactId>
+                <version>2.2.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-mllib_${scala.version.major}</artifactId>
+                <version>2.2.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>${scala.version.major}.${scala.version.minor}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.twitter</groupId>
+                <artifactId>scalding-args_${scala.version.major}</artifactId>
+                <version>0.17.3</version>
+            </dependency>
+            <dependency>
+                <groupId>io.circe</groupId>
+                <artifactId>circe-core_${scala.version.major}</artifactId>
+                <version>0.8.0</version>
+            </dependency>
+            <dependency>
+                <groupId>io.circe</groupId>
+                <artifactId>circe-generic_${scala.version.major}</artifactId>
+                <version>0.8.0</version>
+            </dependency>
+            <dependency>
+                <groupId>io.circe</groupId>
+                <artifactId>circe-parser_${scala.version.major}</artifactId>
+                <version>0.8.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.16.16</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-client</artifactId>
+                <version>2.4.0-mdh2.3.23</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>libthrift</artifactId>
+                        <groupId>org.apache.thrift</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>edu.umass.ciir</groupId>
+                <artifactId>RankLib</artifactId>
+                <version>2.10-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>2.9.9</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.ansj</groupId>
+                <artifactId>matrix-ansj</artifactId>
+                <version>5.1.5-alpha-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>info.debatty</groupId>
+                <artifactId>java-string-similarity</artifactId>
+                <version>0.23</version>
+            </dependency>
+
+            <!--log4j2-->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-1.2-api</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-jcl</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-jul</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.21</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>com.xiaomi.data</groupId>
             <artifactId>data-platform-spec-miuiads</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>com.xiaomi.data</groupId>
             <artifactId>commons-spark</artifactId>
-            <version>0.16.5.3</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_${scala.version.major}</artifactId>
-            <version>2.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-mllib_${scala.version.major}</artifactId>
-            <version>2.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
-            <version>${scala.version.major}.${scala.version.minor}</version>
         </dependency>
         <dependency>
             <groupId>com.twitter</groupId>
             <artifactId>scalding-args_${scala.version.major}</artifactId>
-            <version>0.17.3</version>
         </dependency>
         <dependency>
             <groupId>io.circe</groupId>
             <artifactId>circe-core_${scala.version.major}</artifactId>
-            <version>0.8.0</version>
         </dependency>
         <dependency>
             <groupId>io.circe</groupId>
             <artifactId>circe-generic_${scala.version.major}</artifactId>
-            <version>0.8.0</version>
         </dependency>
         <dependency>
             <groupId>io.circe</groupId>
             <artifactId>circe-parser_${scala.version.major}</artifactId>
-            <version>0.8.0</version>
         </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.16.16</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
-            <version>2.4.0-mdh2.3.23</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>libthrift</artifactId>
-                    <groupId>org.apache.thrift</groupId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>edu.umass.ciir</groupId>
             <artifactId>RankLib</artifactId>
-            <version>2.10-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.9.9</version>
         </dependency>
 
         <dependency>
             <groupId>org.ansj</groupId>
             <artifactId>matrix-ansj</artifactId>
-            <version>5.1.5-alpha-SNAPSHOT</version>
         </dependency>
 
         <dependency>
-            <groupId>miui_ad</groupId>
-            <artifactId>miui-ad-relevance-core</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>info.debatty</groupId>
+            <artifactId>java-string-similarity</artifactId>
         </dependency>
 
         <!--log4j2-->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>${log4j2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>${log4j2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-            <version>${log4j2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-1.2-api</artifactId>
-            <version>${log4j2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jcl</artifactId>
-            <version>${log4j2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jul</artifactId>
-            <version>${log4j2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.21</version>
         </dependency>
     </dependencies>
 

@@ -1,4 +1,4 @@
-package group;
+package com.xiaomi.misearch.appsearch.rank.group;
 
 public enum FeaGroup {
     qy_tags_num,
