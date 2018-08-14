@@ -2,7 +2,7 @@ package base
 
 import com.twitter.scalding.Args
 import model.App
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.SparkConf
 import org.apache.spark.sql.{SaveMode, SparkSession}
 import utils.PathUtils._
 
@@ -21,13 +21,13 @@ object AppGenerator {
       conf = new SparkConf().setMaster("local[*]").setAppName(AppGenerator.getClass.getName)
     }
 
-//    val spark = SparkSession
-//      .builder()
-//      .config(conf)
-//      .getOrCreate()
-//    var sc = spark.sparkContext
+    val spark = SparkSession
+      .builder()
+      .config(conf)
+      .getOrCreate()
 
-    val sc = new SparkContext(conf)
+    import spark.implicits._
+    val sc = spark.sparkContext
 
     val apps = sc
       .textFile(inputPath)
@@ -48,10 +48,9 @@ object AppGenerator {
       }
       .map(_._2)
 
-    if (apps.count > 50000) {
-//      import spark.implicits._
-//      apps.toDF().write.mode(SaveMode.Overwrite).parquet(outputPath)
+    if (apps.count > 1000) {
+      apps.toDF().write.mode(SaveMode.Overwrite).parquet(outputPath)
     }
-//    spark.stop()
+    spark.stop()
   }
 }

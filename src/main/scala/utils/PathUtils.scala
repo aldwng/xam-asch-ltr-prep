@@ -9,11 +9,11 @@ object PathUtils {
   val base_path = "/user/h_misearch/appmarket/rank"
   val base_path_local = "/tmp/appsearch"
 
-  val app_data_parquet_path = base_path + "/base/app"
-  val app_data_parquet_path_local = base_path_local + "/base/app"
-
   val app_data_path = "/user/h_misearch/appmarket/pipeline_data/app_common/app_common.txt"
   val app_data_path_local = base_path_local + "/base/app_common.txt"
+
+  val app_data_parquet_path = base_path + "/base/app"
+  val app_data_parquet_path_local = base_path_local + "/base/app"
 
   val download_history_path = "/user/h_misearch/appmarket/pipeline_data/app_ctr/download_history.txt"
   val appstore_content_stats_path        = "/user/h_data_platform/platform/appstore/appstore_content_statistics"
