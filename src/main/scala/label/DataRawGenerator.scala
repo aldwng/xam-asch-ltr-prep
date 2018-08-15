@@ -1,4 +1,4 @@
-package process
+package label
 
 import com.twitter.scalding.Args
 import com.xiaomi.data.commons.spark.HdfsIO._
@@ -19,11 +19,11 @@ object DataRawGenerator {
   def main(mainArgs: Array[String]): Unit = {
     val args = Args(mainArgs)
     val dev = args.getOrElse("dev", "false").toBoolean
-    val yesterday = semanticDate(args.getOrElse("end", "-1"))
+    val day = semanticDate(args.getOrElse("day", "-1"))
 
     var downloadHistoryPath = download_history_path
-    var queryMapPath = IntermediateDatePath(query_map_path, yesterday.toInt)
-    var outputPath = IntermediateDatePath(date_raw_path, yesterday.toInt)
+    var queryMapPath = IntermediateDatePath(query_map_path, day.toInt)
+    var outputPath = IntermediateDatePath(date_raw_path, day.toInt)
     var conf = new SparkConf()
       .setAppName(DataRawGenerator.getClass.getName)
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")

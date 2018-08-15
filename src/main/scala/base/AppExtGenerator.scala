@@ -18,13 +18,13 @@ object AppExtGenerator {
 
   def main(mainArgs: Array[String]): Unit = {
     val args = Args(mainArgs)
-    val dev   = args.getOrElse("dev", "false").toBoolean
-    val yday   = semanticDate(args.getOrElse("yday", "-1"))
-    val month = semanticDate(args.getOrElse("month", "-30"))
+    val start = semanticDate(args.getOrElse("start", "-30"))
+    val end = semanticDate(args.getOrElse("end", "-1"))
+    val dev = args.getOrElse("dev", "false").toBoolean
 
-    var lastMonthLog = IntermediateDateIntervalPath(appstore_content_stats_path, month, yday)
+    var lastMonthLog = IntermediateDateIntervalPath(appstore_content_stats_path, start, end)
     var appDataPath = app_data_parquet_path
-    var appExtOutputPath = IntermediateDatePath(app_ext_parquet_path, yday.toInt)
+    var appExtOutputPath = IntermediateDatePath(app_ext_parquet_path, end.toInt)
     var conf = new SparkConf()
       .setAppName(AppExtGenerator.getClass.getName)
       .set("spark.sql.parquet.compression.codec", "snappy")
@@ -57,7 +57,7 @@ object AppExtGenerator {
   }
 
   def generate(spark: SparkSession, apps: RDD[App], coClickQueries: RDD[(Long, Seq[String])]): RDD[AppExt] = {
-    val coClickQueryMap  = spark.sparkContext.broadcast(coClickQueries.collectAsMap())
+    val coClickQueryMap = spark.sparkContext.broadcast(coClickQueries.collectAsMap())
 
     return apps.map(app => {
       val appExt = new AppExt()

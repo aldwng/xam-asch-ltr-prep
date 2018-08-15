@@ -1,4 +1,4 @@
-package process
+package label
 
 import com.twitter.scalding.Args
 import com.xiaomi.data.commons.spark.HdfsIO._

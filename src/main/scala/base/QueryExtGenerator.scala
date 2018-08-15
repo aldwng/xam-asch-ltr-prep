@@ -22,9 +22,9 @@ object QueryExtGenerator {
 
   def main(mainArgs: Array[String]): Unit = {
     val args = Args(mainArgs)
-    val dev = args.getOrElse("dev", "false").toBoolean
     val start = semanticDate(args.getOrElse("start", "-30"))
     val end = semanticDate(args.getOrElse("end", "-1"))
+    val dev = args.getOrElse("dev", "false").toBoolean
 
     var inputPaths = IntermediateDateIntervalPath(appstore_content_stats_path, start, end)
     var appExtPath = IntermediateDatePath(app_ext_parquet_path, end.toInt)
@@ -67,39 +67,39 @@ object QueryExtGenerator {
         val appIds = Seq(x.getAppId)
         val tags = x.isSetTags match {
           case true => x.getTags.asScala
-          case _    => Seq.empty
+          case _ => Seq.empty
         }
         val keywords = x.isSetKeywords match {
           case true => x.getKeywords.asScala
-          case _    => Seq.empty
+          case _ => Seq.empty
         }
         val cate1 = x.isSetLevel1CategoryName match {
           case true => Seq(x.getLevel1CategoryName)
-          case _    => Seq.empty
+          case _ => Seq.empty
         }
 
         val cate2 = x.isSetLevel2CategoryName match {
           case true => Seq(x.getLevel2CategoryName)
-          case _    => Seq.empty
+          case _ => Seq.empty
         }
 
         val publisher = x.isSetPublisher match {
           case true => Seq(x.getPublisher)
-          case _    => Seq.empty
+          case _ => Seq.empty
         }
 
         val relatedTags = x.isSetRelatedTags match {
           case true => x.getRelatedTags.asScala
-          case _    => Seq.empty
+          case _ => Seq.empty
         }
 
         val folderTags = x.isSetFolderTags match {
           case true => x.getFolderTags.asScala
-          case _    => Seq.empty
+          case _ => Seq.empty
         }
         val searchKeywords = x.isSetSearchKeywords match {
           case true => x.getSearchKeywords.asScala
-          case _    => Seq.empty
+          case _ => Seq.empty
         }
 
         val googleCates = x.isSetGoogleCates match {
@@ -204,9 +204,9 @@ object QueryExtGenerator {
             Seq.empty
           }
 
-          val googleCates = if(app.isSetGoogleCates){
+          val googleCates = if (app.isSetGoogleCates) {
             app.getGoogleCates.asScala.map(_.getId)
-          }else{
+          } else {
             Seq.empty
           }
 
@@ -214,17 +214,17 @@ object QueryExtGenerator {
       }
       .groupByKey()
       .mapValues { values =>
-        val appIds         = values.map(_._1).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1)
-        val cate1          = values.map(_._2).filter(c => nonBlank(c)).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(1).map(_._1)
-        val cate2          = values.map(_._3).filter(c => nonBlank(c)).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(2).map(_._1)
-        val tags           = values.flatMap(_._4).filter(nonBlank(_)).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1)
-        val keywords       = values.flatMap(_._5).filter(nonBlank(_)).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1)
-        val publisher      = values.map(_._6).filter(p => nonBlank(p)).toSeq.distinct
-        val folderTags     = values.flatMap(_._7).filter(nonBlank(_)).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(5).map(_._1)
-        val relatedTags    = values.flatMap(_._8).filter(nonBlank(_)).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1)
+        val appIds = values.map(_._1).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1)
+        val cate1 = values.map(_._2).filter(c => nonBlank(c)).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(1).map(_._1)
+        val cate2 = values.map(_._3).filter(c => nonBlank(c)).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(2).map(_._1)
+        val tags = values.flatMap(_._4).filter(nonBlank(_)).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1)
+        val keywords = values.flatMap(_._5).filter(nonBlank(_)).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1)
+        val publisher = values.map(_._6).filter(p => nonBlank(p)).toSeq.distinct
+        val folderTags = values.flatMap(_._7).filter(nonBlank(_)).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(5).map(_._1)
+        val relatedTags = values.flatMap(_._8).filter(nonBlank(_)).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1)
         val searchKeywords = values.flatMap(_._9).filter(nonBlank(_)).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1)
         val googleCates = values.flatMap(_._10).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(5).map(_._1)
-        val displayNames   = values.map(_._11).filter(nonBlank(_)).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1)
+        val displayNames = values.map(_._11).filter(nonBlank(_)).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1)
         (appIds, cate1, cate2, tags, keywords, publisher, folderTags, relatedTags, searchKeywords, googleCates, displayNames)
       }
 
@@ -255,14 +255,14 @@ object QueryExtGenerator {
 
     val coClickQueryExtItems = coClickQueryRaw
       .mapValues { v =>
-        val coClickQueries     = v.take(10)
+        val coClickQueries = v.take(10)
         val numList = coClickQueries.map(_._2)
-        val len     = numList.length
-        val avg     = numList.sum.toDouble / len
-        val sd      = computeStandardDeviation(numList, avg, len) + 1.0
+        val len = numList.length
+        val avg = numList.sum.toDouble / len
+        val sd = computeStandardDeviation(numList, avg, len) + 1.0
         coClickQueries.filter(e => !e._1.matches("[a-zA-Z0-9]+")).map { e =>
           val weight = (e._2 - avg) / sd
-          val item   = new QueryExtItem()
+          val item = new QueryExtItem()
           item.setQuery(e._1)
           item.setWeight(weight)
 
@@ -298,20 +298,20 @@ object QueryExtGenerator {
       }
       .groupByKey()
       .map { x =>
-        val query          = x._1
-        val queryExt       = x._2.head._1
-        val values         = x._2.map(_._2).toSeq
-        var appIds         = values.flatMap(_._1).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(50).map(_._1)
-        var cate1          = values.flatMap(_._2).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(2).map(_._1)
-        var cate2          = values.flatMap(_._3).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(4).map(_._1)
-        var tags           = values.flatMap(_._4).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(60).map(_._1)
-        var keywords       = values.flatMap(_._5).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(60).map(_._1)
-        var publisher      = values.flatMap(_._6).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(50).map(_._1)
-        var folderTags     = values.flatMap(_._7).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(10).map(_._1)
-        var relatedTags    = values.flatMap(_._8).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(50).map(_._1)
+        val query = x._1
+        val queryExt = x._2.head._1
+        val values = x._2.map(_._2).toSeq
+        var appIds = values.flatMap(_._1).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(50).map(_._1)
+        var cate1 = values.flatMap(_._2).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(2).map(_._1)
+        var cate2 = values.flatMap(_._3).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(4).map(_._1)
+        var tags = values.flatMap(_._4).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(60).map(_._1)
+        var keywords = values.flatMap(_._5).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(60).map(_._1)
+        var publisher = values.flatMap(_._6).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(50).map(_._1)
+        var folderTags = values.flatMap(_._7).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(10).map(_._1)
+        var relatedTags = values.flatMap(_._8).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(50).map(_._1)
         var searchKeywords = values.flatMap(_._9).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(60).map(_._1)
         var googleCates = values.flatMap(_._10).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(5).map(_._1)
-        var displayNames   = values.flatMap(_._11).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(50).map(_._1).map(_.toLowerCase)
+        var displayNames = values.flatMap(_._11).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(50).map(_._1).map(_.toLowerCase)
 
         if ((!displayNames.contains(query)) && broadCastedAppNameToTagsMap.value.contains(query)) {
           val (appIdsNew, tagsNew, keywordsNew, cate1New, cate2New, publisherNew, relatedTagsNew, folderTagsNew, searchKeywordsNew, googleCatesNew) = broadCastedAppNameToTagsMap.value(query)
@@ -355,8 +355,8 @@ object QueryExtGenerator {
         if (searchKeywords.nonEmpty) {
           queryExt.setSearchKeywords(searchKeywords.asJava)
         }
-        if(googleCates.nonEmpty){
-          queryExt.setGoogleCates(googleCates.map(c=>Integer.valueOf(c)).asJava)
+        if (googleCates.nonEmpty) {
+          queryExt.setGoogleCates(googleCates.map(c => Integer.valueOf(c)).asJava)
         }
         if (displayNames.nonEmpty) {
           queryExt.setDisplayNames(displayNames.asJava)
