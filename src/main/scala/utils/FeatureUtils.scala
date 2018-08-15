@@ -1,8 +1,8 @@
-package features
+package utils
 
 import com.xiaomi.misearch.appsearch.rank.group.FeaGroup
-import com.xiaomi.miui.ad.appstore.feature.{BaseFea, QueryExtItem, RankInstance}
 import com.xiaomi.misearch.appsearch.rank.similarity.impl.{Jaccard, SorensenDice}
+import com.xiaomi.miui.ad.appstore.feature.{BaseFea, QueryExtItem, RankInstance}
 import utils.FeaUtils._
 
 import scala.collection.JavaConverters._
@@ -10,7 +10,7 @@ import scala.collection.JavaConverters._
 /**
   * Created by yun on 17-11-28.
   */
-object ExtractorBase {
+object FeatureUtils {
   final private val cat = "#"
 
   def extractFeatures(instance: RankInstance): List[BaseFea] = {

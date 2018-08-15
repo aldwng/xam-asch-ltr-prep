@@ -10,27 +10,34 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
 import utils.PathUtils._
 
-/**
-  * Created by yun on 18-1-15.
-  */
 object RankInstanceGenerator {
 
   def main(mainArgs: Array[String]): Unit = {
     val args = Args(mainArgs)
+    val dev = args.getOrElse("dev", "false").toBoolean
     val day = semanticDate(args.getOrElse("day", "-1"))
 
-    val rootPath = IntermediateDatePath(base_path, day.toInt)
-    val inputPath = rootPath + "/train/raw/"
-    val queryPath = rootPath + "/queryExt"
-    val appPath = rootPath + "/appExts"
-    val outputPath = rootPath + "/train/instance/"
+    var queryPath = IntermediateDatePath(query_ext_path, day.toInt)
+    var appPath = IntermediateDatePath(app_ext_parquet_path, day.toInt)
+    var inputPath = IntermediateDatePath(date_raw_path, day.toInt)
+    var outputPath = IntermediateDatePath(rank_instance_path, day.toInt)
 
-    val conf = new SparkConf().setAppName("Rank Instance Job")
+    var conf = new SparkConf()
+      .setAppName(RankInstanceGenerator.getClass.getName)
+
+    if (dev) {
+      queryPath = query_ext_path_local
+      appPath = app_ext_parquet_path_local
+      inputPath = data_raw_path_local
+      outputPath = rank_instance_path_local
+
+      conf = conf.setMaster("local[*]")
+    }
+
     val spark = SparkSession
       .builder()
       .config(conf)
       .getOrCreate()
-
     val sc = spark.sparkContext
 
     val appExts = sc.thriftParquetFile(appPath, classOf[AppExt])

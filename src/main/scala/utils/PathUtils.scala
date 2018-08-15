@@ -18,62 +18,38 @@ object PathUtils {
   val app_ext_parquet_path = base_path + "/base/app_ext"
   val app_ext_parquet_path_local = base_path_local + "/base/app_ext"
 
+  val query_ext_path = base_path + "/base/query_ext"
+  val query_ext_path_local = base_path_local + "/base/query_ext"
+
+  val query_map_path = base_path + "/train/query_map"
+  val query_map_path_local = base_path_local + "/train/query_map"
+
+  val date_raw_path = base_path + "/train/data_raw"
+  val data_raw_path_local = base_path_local + "/train/data_raw/"
+
+  val rank_instance_path = base_path + "/train/rank_instance"
+  val rank_instance_path_local = base_path_local + "/train/rank_instance/"
+
+  val sample_path = base_path + "/train/sample"
+  val sample_path_local = base_path_local + "/train/sample/"
+
+  val fea_map_path = base_path + "/train/fea_map"
+  val fea_map_path_local = base_path_local + "/train/fea_map"
+
+  val fea_text_path = base_path + "/train/fea_text"
+  val fea_text_path_local = base_path_local + "/train/fea_text"
+
+  val rank_sample_path = base_path + "/train/rank_sample"
+  val rank_sample_path_local = base_path_local + "/train/rank_sample/"
+
   val appstore_content_stats_path = "/user/h_data_platform/platform/appstore/appstore_content_statistics"
   val appstore_content_stats_path_local = base_path_local + "/stats/content"
 
   val download_history_path = "/user/h_misearch/appmarket/pipeline_data/app_ctr/download_history.txt"
-  val appstore_pv_path                   = "/user/h_data_platform/platform/appstore/appstore_pv_statistics"
-  val app_active_log_path                = "/user/h_data_platform/platform/appstore/app_active_log_info"
-  val app_tags_path                      = "matrix/relevance/app_tags"
-  val exchange_bid_service_stat_log_path = "/user/h_scribe/miuiads/miuiads_exchange_bid_service_stat_log"
-  val miui_ad_bid_billing_path           = "/user/h_data_platform/platform/miuiads/miui_ad_bid_billing"
-  val misearch_global_news_hotquery_path = "/user/h_data_platform/platform/misearch/misearch_global_news_hotquery/data"
+  val download_history_path_local = base_path_local + "/download_history.txt"
 
-  val delivery_diagnosis_log_v2_path = "/user/h_scribe/miuiads/miuiads_delivery_diagnosis_log_v2"
-  val ad_log_v2_path                 = "/user/h_scribe/miuiads/miuiads_ad_log_v2"
-  val ad_event_path                  = "/user/h_data_platform/platform/miuiads/ad_event"
-
-  val query_extender_path = "/user/h_data_platform/platform/miuiads/appstore_search/coclick_query_extender_v2"
-
-  val ad_info_path = "/user/h_miui_ad/matrix/relevance/ad_info"
-
-  val app_info_path         = "/user/h_data_platform/platform/appstore/appstore_appinfo/data/appinfo_to_hive_CN.txt"
-  val app_info_parquet_path = "matrix/relevance/all_app"
-
-
-  val filter_black_list = "matrix/relevance/filter/black_list"
-  val filter_white_list ="matrix/relevance/filter/white_list"
-
-  val app_expansion_path         = "/user/h_miui_ad/matrix/qu/app-expansion"
-  val behavior_tags_keyword_path = "/user/h_miui_ad/matrix/warehouse/behavior_tags_keyword/std"
-
-  val predict_query_path = "/user/h_miui_ad/develop/heqingquan/AppStore/AvaliableKeyword2SearchResultPage"
-
-  val case_study_path              = base_path + "/case_study"
-  val case_study_query_path        = case_study_path + "/query"
-  val case_study_query_map_path    = case_study_path + "/query_map"
-  val case_study_base_path         = case_study_path + "/base"
-  val case_study_sample_path       = case_study_path + "/sample"
-  val case_study_result_path       = case_study_path + "/result"
-  val case_study_score_path        = case_study_path + "/score"
-  val ruled_case_study_result_path = case_study_path + "/rule_result"
-
-  val lookup_table_path           = base_path + "/lookup_table"
-  val ruled_lookup_table_path     = base_path + "/ruled_lookup_table"
-  val ruled_lookup_table_bak_path = base_path + "/ruled_lookup_table_bak"
-  val boot_lookup_table_path      = base_path + "/boot_lookup_table"
-  val gsearch_lookup_table_path     = base_path + "/gsearch_lookup_table"
-
-  val natural_result_path           = base_path + "/natural_result"
-  val natural_result_rawrank_path   = natural_result_path + "/rawrank"
-  val natural_result_query_path     = natural_result_path + "/query"
-  val natural_result_query_map_path = natural_result_path + "/query_map"
-  val natural_result_base_path      = natural_result_path + "/base"
-  val natural_result_sample_path    = natural_result_path + "/sample"
-  val natural_result_rerank_path    = natural_result_path + "/rerank"
-
-  val DATE_PATTERN      = "yyyyMMdd"
-  val TIME_PATTERN      = "HH:mm:ss"
+  val DATE_PATTERN = "yyyyMMdd"
+  val TIME_PATTERN = "HH:mm:ss"
   val DATE_TIME_PATTERN = s"$DATE_PATTERN $TIME_PATTERN"
 
   def parseQuery(word: String): String = {
@@ -116,19 +92,19 @@ object PathUtils {
     formatter.parseDateTime(dateTimeStr)
   }
 
-  val DATE_RE     = """(\d{8})""".r
+  val DATE_RE = """(\d{8})""".r
   val REL_DATE_RE = """-(\d+)""".r
 
   def semanticDate(str: String, pattern: String = "yyyyMMdd") = str match {
-    case DATE_RE(s)     => s
+    case DATE_RE(s) => s
     case REL_DATE_RE(s) => new DateTime().minusDays(s.toInt).toString(pattern)
-    case "today"        => new DateTime().toString(pattern)
-    case "yesterday"    => new DateTime().minusDays(1).toString(pattern)
+    case "today" => new DateTime().toString(pattern)
+    case "yesterday" => new DateTime().minusDays(1).toString(pattern)
   }
 
   def intervalDates(start: String, end: String, pattern: String = "yyyyMMdd") = {
     val startDate = parseDate(start, pattern)
-    val endDate   = parseDate(end, pattern)
+    val endDate = parseDate(end, pattern)
     for {
       i <- 0 to Days.daysBetween(startDate, endDate).getDays
     } yield {

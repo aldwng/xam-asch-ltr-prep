@@ -10,7 +10,8 @@ import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 import utils.PathUtils._
-import utils.ProcessUtils._
+import utils.TextUtils._
+import utils.MathUtils._
 
 import scala.collection.JavaConverters._
 
@@ -20,25 +21,33 @@ import scala.collection.JavaConverters._
 object QueryExtGenerator {
 
   def main(mainArgs: Array[String]): Unit = {
-    val args  = Args(mainArgs)
+    val args = Args(mainArgs)
+    val dev = args.getOrElse("dev", "false").toBoolean
     val start = semanticDate(args.getOrElse("start", "-30"))
-    val end   = semanticDate(args.getOrElse("end", "-1"))
+    val end = semanticDate(args.getOrElse("end", "-1"))
 
-    val inputPaths  = IntermediateDateIntervalPath(appstore_content_stats_path, start, end)
-    val rootPath    = IntermediateDatePath(base_path, end.toInt)
-    val outputPath  = rootPath + "/queryExt"
-    val appExtPath = base_path + "/appBase"
+    var inputPaths = IntermediateDateIntervalPath(appstore_content_stats_path, start, end)
+    var appExtPath = IntermediateDatePath(app_ext_parquet_path, end.toInt)
+    var outputPath = IntermediateDatePath(query_ext_path, end.toInt)
+    var conf = new SparkConf().setAppName(QueryExtGenerator.getClass.getName)
 
-    val conf = new SparkConf().setAppName("Query Ext Job")
+    if (dev) {
+      inputPaths = Seq(appstore_content_stats_path_local)
+      appExtPath = app_ext_parquet_path_local
+      outputPath = query_ext_path_local
+      conf = conf.setMaster("local[*]")
+    }
+
     val spark = SparkSession
       .builder()
       .config(conf)
       .getOrCreate()
 
-    val fs      = FileSystem.get(new Configuration())
-    val sc      = spark.sparkContext
+    val fs = FileSystem.get(new Configuration())
+    val sc = spark.sparkContext
     val appExts = sc.thriftParquetFile(appExtPath, classOf[AppExt])
-    val data    = generate(spark, inputPaths, appExts)
+
+    val data = generate(spark, inputPaths, appExts)
     fs.delete(new Path(outputPath), true)
     data.saveAsParquetFile(outputPath)
 

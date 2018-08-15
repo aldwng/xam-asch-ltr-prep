@@ -19,16 +19,24 @@ object RankSampleGenerator {
 
   def main(mainArgs: Array[String]): Unit = {
     val args      = Args(mainArgs)
+    val dev = args.getOrElse("dev", "false").toBoolean
     val day       = semanticDate(args.getOrElse("day", "-1"))
     val partition = args.getOrElse("partition", "10").toInt
-    val rootPath  = IntermediateDatePath(base_path, day.toInt)
 
-    val inputPath  = rootPath + "/train/base/"
-    val feaPath    = rootPath + "/feaMap"
-    val queryPath  = rootPath + "/train/queryMap"
-    val outputPath = rootPath + "/train/sample/"
+    var feaPath = IntermediateDatePath(fea_map_path, day.toInt)
+    var queryPath = IntermediateDatePath(query_map_path, day.toInt)
+    var inputPath = IntermediateDatePath(sample_path, day.toInt)
+    var outputPath = IntermediateDatePath(rank_sample_path, day.toInt)
 
-    val conf = new SparkConf().setAppName("Rank Sample Job")
+    var conf = new SparkConf().setAppName("Rank Sample Job")
+    if(dev) {
+      feaPath = fea_map_path_local
+      queryPath =  query_map_path_local
+      inputPath = sample_path_local
+      outputPath = rank_sample_path_local
+      conf.setMaster("local[*]")
+    }
+
     val spark = SparkSession
       .builder()
       .config(conf)
@@ -70,7 +78,8 @@ object RankSampleGenerator {
         .repartition(partition)
 
       fs.delete(new Path(outputPath + path), true)
-      SampleUtils.outputRankSamples(sc, samples, outputPath + path)
+      val result = SampleUtils.generateRankSamples(sc, samples)
+      result.saveAsTextFile(outputPath + path)
     }
 
     spark.stop()

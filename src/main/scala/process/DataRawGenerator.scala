@@ -3,29 +3,38 @@ package process
 import com.twitter.scalding.Args
 import com.xiaomi.data.commons.spark.HdfsIO._
 import com.xiaomi.miui.ad.appstore.feature.DataRaw
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
-import utils.PathUtils
 import utils.PathUtils._
-import utils.ProcessUtils._
+import utils.TextUtils._
+import utils.QueryUtils._
 
 import scala.collection.JavaConverters._
-
 
 object DataRawGenerator {
 
   def main(mainArgs: Array[String]): Unit = {
     val args = Args(mainArgs)
+    val dev = args.getOrElse("dev", "false").toBoolean
     val yesterday = semanticDate(args.getOrElse("end", "-1"))
-    val rootPath = IntermediateDatePath(base_path, yesterday.toInt)
-    val queryMapPath = rootPath + "/train/queryMap"
-    val outputPath = rootPath + "/train/dataRaw"
 
-    val conf = new SparkConf()
-      .setAppName("Data Base Job")
+    var downloadHistoryPath = download_history_path
+    var queryMapPath = IntermediateDatePath(query_map_path, yesterday.toInt)
+    var outputPath = IntermediateDatePath(date_raw_path, yesterday.toInt)
+    var conf = new SparkConf()
+      .setAppName(DataRawGenerator.getClass.getName)
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .set("spark.sql.parquet.compression.codec", "snappy")
+
+    if (dev) {
+      downloadHistoryPath = download_history_path_local
+      queryMapPath = query_map_path_local
+      outputPath = data_raw_path_local
+      conf = conf.setMaster("local[*]")
+    }
 
     val spark = SparkSession
       .builder()
@@ -33,7 +42,7 @@ object DataRawGenerator {
       .getOrCreate()
 
     val sc = spark.sparkContext
-    val downloadHistory = sc.textFile(PathUtils.download_history_path).flatMap(line => {
+    val downloadHistory = sc.textFile(downloadHistoryPath).flatMap(line => {
       val items = line.split("\t")
       val query = items(0)
       val downloadHistory = items(3)
@@ -48,17 +57,27 @@ object DataRawGenerator {
       result
     })
 
+    val fs = FileSystem.get(new Configuration())
     val dataRaw = generate(spark, downloadHistory)
     val queries = dataRaw.map(x => x.getQuery).distinct()
-    saveAsQueryMap(queries, queryMapPath)
+    val queryMap = convertToQueryMap(queries)
+    fs.delete(new Path(queryMapPath), true)
+    queryMap.saveAsParquetFile(queryMapPath)
 
     val result = queries.map(_ -> 1).randomSplit(Array(0.8, 0.1, 0.1))
     val train = result(0).collectAsMap()
     val validate = result(1).collectAsMap()
     val test = result(2).collectAsMap()
-    dataRaw.filter(x => train.contains(x.getQuery)).saveAsParquetFile(outputPath + "/train")
-    dataRaw.filter(x => validate.contains(x.getQuery)).saveAsParquetFile(outputPath + "/validate")
-    dataRaw.filter(x => test.contains(x.getQuery)).saveAsParquetFile(outputPath + "/test")
+
+    val trainOutputPath = outputPath + "train"
+    val validateOutputPath = outputPath + "validate"
+    val testOutputPath = outputPath + "test"
+    fs.delete(new Path(trainOutputPath), true)
+    fs.delete(new Path(validateOutputPath), true)
+    fs.delete(new Path(testOutputPath), true)
+    dataRaw.filter(x => train.contains(x.getQuery)).saveAsParquetFile(trainOutputPath)
+    dataRaw.filter(x => validate.contains(x.getQuery)).saveAsParquetFile(validateOutputPath)
+    dataRaw.filter(x => test.contains(x.getQuery)).saveAsParquetFile(testOutputPath)
 
     spark.stop()
     println("Job done!")

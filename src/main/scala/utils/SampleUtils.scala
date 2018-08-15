@@ -7,7 +7,7 @@ import org.apache.spark.rdd.RDD
 import scala.collection.JavaConverters._
 
 object SampleUtils {
-  def outputRankSamples(sc: SparkContext, samples: RDD[Sample], outputPath: String): Unit = {
+  def generateRankSamples(sc: SparkContext, samples: RDD[Sample]): RDD[String] = {
     val data = samples
       .filter(x => x.isSetFeatures && x.isSetQid)
       .map { sample =>
@@ -15,15 +15,15 @@ object SampleUtils {
           .map(f => f.getId -> f.getValue)
           .filter(x => Math.abs(x._2) >= 0.0001)
         val label = sample.isSetLabel match {
-          case true  => sample.getLabel
+          case true => sample.getLabel
           case false => 0
         }
         (label, sample.getQid, features, sample.getCommon)
       }
       .filter(_._3.size > 0)
 
-    data
-     // .repartition(partition)
+    return data
+      // .repartition(partition)
       .sortBy(_._2)
       .map {
         case (label, qid, features, common) =>
@@ -36,6 +36,5 @@ object SampleUtils {
             .mkString(" ")
           s"${label} qid:${qid} ${text} # ${common}"
       }
-      .saveAsTextFile(outputPath)
   }
 }

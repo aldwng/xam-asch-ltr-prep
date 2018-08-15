@@ -9,9 +9,8 @@ import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
-import utils.FilterWords
 import utils.PathUtils._
-import utils.ProcessUtils._
+import utils.TextUtils
 
 import scala.collection.JavaConverters._
 
@@ -25,7 +24,7 @@ object AppExtGenerator {
 
     var lastMonthLog = IntermediateDateIntervalPath(appstore_content_stats_path, month, yday)
     var appDataPath = app_data_parquet_path
-    var appExtOutputPath = app_ext_parquet_path
+    var appExtOutputPath = IntermediateDatePath(app_ext_parquet_path, yday.toInt)
     var conf = new SparkConf()
       .setAppName(AppExtGenerator.getClass.getName)
       .set("spark.sql.parquet.compression.codec", "snappy")
@@ -35,10 +34,7 @@ object AppExtGenerator {
       appDataPath = app_data_parquet_path_local
       appExtOutputPath = app_ext_parquet_path_local
 
-      conf = new SparkConf()
-        .setMaster("local[*]")
-        .setAppName(AppExtGenerator.getClass.getName)
-        .set("spark.sql.parquet.compression.codec", "snappy")
+      conf = conf.setMaster("local[*]")
     }
 
     val spark = SparkSession
@@ -72,7 +68,7 @@ object AppExtGenerator {
         val displayName = app.displayName.get
         appExt.setDisplayName(displayName)
 
-        val displayNameSeg = wordSegment(displayName)
+        val displayNameSeg = TextUtils.wordSegment(displayName)
         if (displayNameSeg.size > 0) {
           appExt.setDisplayNameSeg(displayNameSeg.asJava)
         }
@@ -82,9 +78,9 @@ object AppExtGenerator {
         val desc = app.introduction.get
         appExt.setDesc(desc)
 
-        val descSeg = textSegment(desc)
+        val descSeg = TextUtils.textSegment(desc)
         if (descSeg.size > 0) {
-          appExt.setDescSeg(tokenize(descSeg).asJava)
+          appExt.setDescSeg(TextUtils.tokenize(descSeg).asJava)
         }
       }
 
@@ -92,9 +88,9 @@ object AppExtGenerator {
         val brief = app.brief.get
         appExt.setBrief(brief)
 
-        val briefSeg = textSegment(brief)
+        val briefSeg = TextUtils.textSegment(brief)
         if (briefSeg.size > 0) {
-          appExt.setBriefSeg(tokenize(briefSeg).asJava)
+          appExt.setBriefSeg(TextUtils.tokenize(briefSeg).asJava)
         }
       }
 
@@ -193,8 +189,8 @@ object AppExtGenerator {
       .filter(x => x.ref.isDefined && x.ref.get.equals("search"))
       .filter(x => x.ads.isDefined && x.ads.get == 0)
       .filter(x => x.appId.isDefined && x.searchKeyword.isDefined)
-      .filter(x => !FilterWords.isNumber(x.searchKeyword))
-      .filter(x => !FilterWords.isUrl(x.searchKeyword))
+      .filter(x => !TextUtils.isNumber(x.searchKeyword))
+      .filter(x => !TextUtils.isUrl(x.searchKeyword))
       .filter(x => x.download.isDefined && x.download.get > 0)
       .map(x => x.appId.get -> parseQuery(x.searchKeyword.get))
       .filter(x => nonBlank(x._2))
@@ -204,8 +200,8 @@ object AppExtGenerator {
 
     val output = input.map {
       case (appId, queries) =>
-        val terms = wordSegment(queries.mkString(" "))
-        val qys = tokenize(terms)
+        val terms = TextUtils.wordSegment(queries.mkString(" "))
+        val qys = TextUtils.tokenize(terms)
           .map(x => x -> 1)
           .groupBy(_._1)
           .map(x => (x._1, x._2.size))
