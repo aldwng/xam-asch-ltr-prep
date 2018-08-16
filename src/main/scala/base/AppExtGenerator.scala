@@ -18,7 +18,7 @@ object AppExtGenerator {
 
   def main(mainArgs: Array[String]): Unit = {
     val args = Args(mainArgs)
-    val start = semanticDate(args.getOrElse("start", "-30"))
+    val start = semanticDate(args.getOrElse("start", "-7"))
     val end = semanticDate(args.getOrElse("end", "-1"))
     val dev = args.getOrElse("dev", "false").toBoolean
 

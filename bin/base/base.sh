@@ -7,6 +7,6 @@ echo "bin dir: ${BIN_DIR}"
 source ${BIN_DIR}/util/util.sh
 
 run base.AppGenerator
-run base.AppExtGenerator --start ${month} --end ${day}
-run base.QueryExtGenerator --start ${month} --end ${day}
+run base.AppExtGenerator --start ${week} --end ${day}
+run base.QueryExtGenerator --start ${week} --end ${day}
 
