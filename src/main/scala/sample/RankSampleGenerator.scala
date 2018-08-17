@@ -58,7 +58,7 @@ object RankSampleGenerator {
       .collectAsMap()
 
     val fs    = FileSystem.get(new Configuration())
-    val paths = Seq("train", "validate", "test")
+    val paths = Seq("/train", "/validate", "/test")
     paths.foreach { path =>
       val samples = sc
         .thriftParquetFile(inputPath + path, classOf[Sample])

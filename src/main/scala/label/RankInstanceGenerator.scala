@@ -44,7 +44,7 @@ object RankInstanceGenerator {
     val queryExts = sc.thriftParquetFile(queryPath, classOf[QueryExt])
 
     val fs = FileSystem.get(new Configuration())
-    val paths = Seq("train", "validate", "test")
+    val paths = Seq("/train", "/validate", "/test")
     paths.foreach { path =>
       val dataRaws = sc.thriftParquetFile(inputPath + path, classOf[DataRaw])
       val instance = generate(sc, dataRaws, appExts, queryExts)

@@ -69,9 +69,9 @@ object DataRawGenerator {
     val validate = result(1).collectAsMap()
     val test = result(2).collectAsMap()
 
-    val trainOutputPath = outputPath + "train"
-    val validateOutputPath = outputPath + "validate"
-    val testOutputPath = outputPath + "test"
+    val trainOutputPath = outputPath + "/train"
+    val validateOutputPath = outputPath + "/validate"
+    val testOutputPath = outputPath + "/test"
     fs.delete(new Path(trainOutputPath), true)
     fs.delete(new Path(validateOutputPath), true)
     fs.delete(new Path(testOutputPath), true)

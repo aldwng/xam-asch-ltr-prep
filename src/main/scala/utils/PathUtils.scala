@@ -25,13 +25,13 @@ object PathUtils {
   val query_map_path_local = base_path_local + "/train/query_map"
 
   val date_raw_path = base_path + "/train/data_raw"
-  val data_raw_path_local = base_path_local + "/train/data_raw/"
+  val data_raw_path_local = base_path_local + "/train/data_raw"
 
   val rank_instance_path = base_path + "/train/rank_instance"
-  val rank_instance_path_local = base_path_local + "/train/rank_instance/"
+  val rank_instance_path_local = base_path_local + "/train/rank_instance"
 
   val sample_path = base_path + "/train/sample"
-  val sample_path_local = base_path_local + "/train/sample/"
+  val sample_path_local = base_path_local + "/train/sample"
 
   val fea_map_path = base_path + "/train/fea_map"
   val fea_map_path_local = base_path_local + "/train/fea_map"
@@ -40,7 +40,7 @@ object PathUtils {
   val fea_text_path_local = base_path_local + "/train/fea_text"
 
   val rank_sample_path = base_path + "/train/rank_sample"
-  val rank_sample_path_local = base_path_local + "/train/rank_sample/"
+  val rank_sample_path_local = base_path_local + "/train/rank_sample"
 
   val appstore_content_stats_path = "/user/h_data_platform/platform/appstore/appstore_content_statistics"
   val appstore_content_stats_path_local = base_path_local + "/stats/content"

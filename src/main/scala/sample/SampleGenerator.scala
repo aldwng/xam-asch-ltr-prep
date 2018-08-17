@@ -36,7 +36,7 @@ object SampleGenerator {
 
     val sc = spark.sparkContext
     val fs = FileSystem.get(new Configuration())
-    val paths = Seq("train", "validate", "test")
+    val paths = Seq("/train", "/validate", "/test")
     paths.foreach {
       path =>
         val data = sc.thriftParquetFile(inputPath + path, classOf[RankInstance])
