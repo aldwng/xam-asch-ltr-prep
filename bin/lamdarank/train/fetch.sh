@@ -52,7 +52,7 @@ else
 fi
 
 cd ${OUTPUT_PATH}
-wc -l train.txt test.text validate.txt
+wc -l train.txt test.txt validate.txt
 
 # Fetch ranklib-2.10-snapshot.jar
 ${HADOOP} ${C3_CLUSTER} fs -get /user/h_misearch/appmarket/rank/ranklib-2.10-snapshot.jar ${OUTPUT_PATH}/ranklib-2.10-snapshot.jar
