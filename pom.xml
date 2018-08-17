@@ -382,6 +382,12 @@
                             <resource>META-INF/services/org.apache.hadoop.fs.FileSystem</resource>
                         </transformer>
                     </transformers>
+                    <relocations>
+                        <relocation>
+                            <pattern>shapeless</pattern>
+                            <shadedPattern>com.shaded.shapeless</shadedPattern>
+                        </relocation>
+                    </relocations>
                 </configuration>
             </plugin>
             <plugin>
