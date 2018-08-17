@@ -52,5 +52,6 @@ object AppGenerator {
       apps.toDF().write.mode(SaveMode.Overwrite).parquet(outputPath)
     }
     spark.stop()
+    println("Job done!")
   }
 }

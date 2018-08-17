@@ -14,7 +14,7 @@ echo "train: $month $week $day"
 function run {
      /home/work/tars/infra-client/bin/spark-submit \
         --java 8 \
-        --cluster c3prc-hadoop \
+        --cluster c3prc-hadoop-spark2.1 \
         --class "$1" \
         --master yarn-cluster \
         --queue service.cloud_group.sns.queue_1 \
