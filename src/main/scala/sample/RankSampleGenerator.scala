@@ -12,9 +12,6 @@ import utils.SampleUtils
 
 import scala.collection.JavaConverters._
 
-/**
-  * Created by yun on 18-1-16.
-  */
 object RankSampleGenerator {
 
   def main(mainArgs: Array[String]): Unit = {

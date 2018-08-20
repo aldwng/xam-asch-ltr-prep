@@ -15,9 +15,6 @@ import utils.MathUtils._
 
 import scala.collection.JavaConverters._
 
-/**
-  * Created by yun on 18-1-17.
-  */
 object QueryExtGenerator {
 
   def main(mainArgs: Array[String]): Unit = {

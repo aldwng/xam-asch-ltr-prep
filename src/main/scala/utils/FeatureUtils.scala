@@ -7,9 +7,6 @@ import utils.FeaUtils._
 
 import scala.collection.JavaConverters._
 
-/**
-  * Created by yun on 17-11-28.
-  */
 object FeatureUtils {
   final private val cat = "#"
 
