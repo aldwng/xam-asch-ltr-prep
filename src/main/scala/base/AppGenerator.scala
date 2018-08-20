@@ -2,7 +2,8 @@ package base
 
 import com.twitter.scalding.Args
 import model.App
-import org.apache.spark.SparkConf
+import org.apache.spark.rdd.RDD
+import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.{SaveMode, SparkSession}
 import utils.PathUtils._
 
@@ -12,10 +13,12 @@ object AppGenerator {
     val args = Args(mainArgs)
     val dev   = args.getOrElse("dev", "false").toBoolean
 
+    var categoryPath = category_path
     var inputPath = app_data_path
     var outputPath = app_data_parquet_path
     var conf = new SparkConf().setAppName(AppGenerator.getClass.getName).set("spark.sql.parquet.compression.codec", "snappy")
     if (dev) {
+      categoryPath = category_path_local
       inputPath = app_data_path_local
       outputPath = app_data_parquet_path_local
       conf = conf.setMaster("local[*]")
@@ -29,10 +32,13 @@ object AppGenerator {
     import spark.implicits._
     val sc = spark.sparkContext
 
+    val categories = loadCategories(sc, categoryPath)
+    val categoryMap = spark.sparkContext.broadcast(categories.collectAsMap())
+
     val apps = sc
       .textFile(inputPath)
       .flatMap { line =>
-        App.getApp(line)
+        App.getApp(line, categoryMap)
       }
       .map { x =>
         x.packageName -> x
@@ -53,5 +59,14 @@ object AppGenerator {
     }
     spark.stop()
     println("Job done!")
+  }
+
+  def loadCategories(sc: SparkContext, categoryPath: String): RDD[(Int, String)] ={
+    return sc.textFile(categoryPath).map(line => {
+      val items = line.split("\t")
+      val cateId = items(0).toInt
+      val cateName = items(2)
+      (cateId, cateName)
+    })
   }
 }

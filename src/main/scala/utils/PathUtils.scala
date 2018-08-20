@@ -12,6 +12,9 @@ object PathUtils {
   val app_data_path = "/user/h_misearch/appmarket/pipeline_data/app_common/app_common.txt"
   val app_data_path_local = base_path_local + "/base/app_common.txt"
 
+  val category_path = base_path + "/base/category.txt"
+  val category_path_local = base_path_local + "/base/category.txt"
+
   val app_data_parquet_path = base_path + "/base/app"
   val app_data_parquet_path_local = base_path_local + "/base/app"
 

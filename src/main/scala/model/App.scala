@@ -2,6 +2,7 @@ package model
 
 import io.circe.generic.auto._
 import io.circe.parser.decode
+import org.apache.spark.broadcast.Broadcast
 import utils.PathUtils.nonBlank
 
 /**
@@ -30,7 +31,9 @@ final case class App(
                       searchKeywords: Seq[String],
                       tagNames: Seq[String],
                       publisher: Option[String],
-                      wdjCategory: Option[String]
+                      wdjCategory: Option[String],
+                      level1Category: Option[String],
+                      level2Category: Option[String]
                     )
 
 final case class AppRaw(
@@ -56,11 +59,13 @@ final case class AppRaw(
                          search_keywords: Option[String],
                          tagNames: Option[Seq[String]],
                          publisher: Option[String],
-                         wdj_category: Option[String]
+                         wdj_category: Option[String],
+                         level1_category_id: Option[Int],
+                         level2_category_id: Option[Int]
                        )
 
 object App {
-  def getApp(line: String): Option[App] = {
+  def getApp(line: String, categoryMap: Broadcast[scala.collection.Map[Int, String]]): Option[App] = {
     val rawOption = decode[AppRaw](line).right.toOption
     if (rawOption.isDefined) {
       val raw = rawOption.get
@@ -89,6 +94,26 @@ object App {
         case _ => Seq.empty
       }
 
+      val level1Category = raw.level1_category_id.isDefined match {
+        case true => {
+          categoryMap.value.contains(raw.level1_category_id.get) match {
+            case true => Some(categoryMap.value(raw.level1_category_id.get))
+            case _ => None
+          }
+        }
+        case _ => None
+      }
+
+      val level2Category = raw.level2_category_id.isDefined match {
+        case true => {
+          categoryMap.value.contains(raw.level2_category_id.get) match {
+            case true => Some(categoryMap.value(raw.level2_category_id.get))
+            case _ => None
+          }
+        }
+        case _ => None
+      }
+
       val data = App(
         raw.app_active_rank,
         raw.app_cdr,
@@ -112,7 +137,9 @@ object App {
         search_keywords,
         tagNames,
         raw.publisher,
-        raw.wdj_category
+        raw.wdj_category,
+        level1Category,
+        level2Category
       )
       Some(data)
     } else {

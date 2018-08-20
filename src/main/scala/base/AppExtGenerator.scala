@@ -98,8 +98,14 @@ object AppExtGenerator {
         appExt.setPublisher(app.publisher.get)
       }
 
-      //        appExt.setLevel1CategoryName()
-      //        appExt.setLevel2CategoryName()
+      if (app.level1Category.isDefined) {
+        appExt.setLevel1CategoryName(app.level1Category.get)
+      }
+
+      if (app.level2Category.isDefined) {
+        appExt.setLevel2CategoryName(app.level2Category.get)
+      }
+
       //        appExt.setTags()
       //        appExt.setDeveloperAppCount()
       //        appExt.setApkSize()
@@ -213,6 +219,4 @@ object AppExtGenerator {
     }
     output
   }
-
-
 }
