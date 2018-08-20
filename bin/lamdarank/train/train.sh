@@ -29,7 +29,7 @@ model="${DATA_PATH}/model.txt"
 rm ${model}
 
 JAVA="/usr/java/jdk1.8.0_144/bin/java"
-JAVA_OPTS="-Xms512M -Xmx10g"
+JAVA_OPTS="-Xms512m -Xmx5g"
 
 function run {
 ${JAVA} ${JAVA_OPTS} -jar ${jar} \
