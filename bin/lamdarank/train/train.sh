@@ -54,8 +54,8 @@ ${JAVA} ${JAVA_OPTS} -jar ${jar} \
 if [ -e "${train}" ] && [ -e "${test}" ] && [ -e "${validate}" ] && [ -e "${jar}" ];
 then
   run
-  ${HADOOP} ${C3_CLUSTER} fs -put -f ${model} /user/h_misearch/appmarket/rank/model/${model}
-  ${HADOOP} ${C3_CLUSTER} fs -put -f ${model} /user/h_misearch/appmarket/rank/model/${model}.${day}
+  ${HADOOP} ${C3_CLUSTER} fs -put -f ${model} /user/h_misearch/appmarket/rank/model/model.txt
+  ${HADOOP} ${C3_CLUSTER} fs -put -f ${model} /user/h_misearch/appmarket/rank/model/model.txt.${day}
   echo "Upload model.txt success!"
 else
     echo "Error! model train data files are not exist!"

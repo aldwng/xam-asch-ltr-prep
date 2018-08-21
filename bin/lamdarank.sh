@@ -7,6 +7,7 @@ source ${BIN_DIR}/util/util.sh
 
 LOGS="${BIN_DIR}/logs"
 
+mkdir -p ${LOGS}
 bash ${BIN_DIR}/base/base.sh ${day} >> ${LOGS}/base.log 2>&1
 bash ${BIN_DIR}/lamdarank/sample.sh ${day} >> ${LOGS}/sample.log 2>&1
 bash ${BIN_DIR}/lamdarank/train.sh ${day} >> ${LOGS}/model.log 2>&1

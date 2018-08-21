@@ -41,7 +41,7 @@ object FeaMapGenerator {
 
     val fs = FileSystem.get(new Configuration())
     val sc = spark.sparkContext
-    val paths = Seq("train", "validate", "test")
+    val paths = Seq("/train", "/validate", "/test")
     val samples = paths
       .map(path => {
         sc.thriftParquetFile(inputPath + path, classOf[Sample])
