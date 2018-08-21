@@ -51,6 +51,27 @@ object PathUtils {
   val download_history_path = "/user/h_misearch/appmarket/pipeline_data/app_ctr/download_history.txt"
   val download_history_path_local = base_path_local + "/download_history.txt"
 
+  val model_path = base_path + "/model/model.txt"
+  val model_path_local = base_path_local + "/model/model.txt"
+
+  val predict_query_map_path = base_path + "/predict/queryMap"
+  val predict_query_map_path_local = base_path_local + "/predict/queryMap"
+
+  val predict_rerank_path = base_path + "/predict/rerank"
+  val predict_rerank_path_local = base_path_local + "/predict/rerank"
+
+  val predict_sample_path = base_path + "/predict/sample"
+  val predict_sample_path_local = base_path_local + "/predict/sample"
+
+  val natural_results_path = base_path + "/predict/natural_results.txt"
+  val natural_results_path_local = base_path_local + "/predict/natural_results.txt"
+
+  val predict_base_path = base_path + "/predict/base"
+  val predict_base_path_local = base_path_local + "/predict/base"
+
+  val predict_download_history_path = base_path + "/predict/download_history"
+  val predict_download_history_path_local = base_path_local + "/predict/download_history"
+
   val DATE_PATTERN = "yyyyMMdd"
   val TIME_PATTERN = "HH:mm:ss"
   val DATE_TIME_PATTERN = s"$DATE_PATTERN $TIME_PATTERN"

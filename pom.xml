@@ -24,12 +24,28 @@
                 <groupId>com.xiaomi.data</groupId>
                 <artifactId>data-platform-spec-miuiads</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>thrift</artifactId>
+                        <groupId>org.apache.thrift</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
                 <groupId>com.xiaomi.data</groupId>
                 <artifactId>commons-spark_${scala.version.major}</artifactId>
                 <version>0.17.5.3</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>protobuf-java</artifactId>
+                        <groupId>com.google.protobuf</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>libthrift</artifactId>
+                        <groupId>org.apache.thrift</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -47,6 +63,12 @@
                 <groupId>org.apache.spark</groupId>
                 <artifactId>spark-mllib_${scala.version.major}</artifactId>
                 <version>2.1.0-mdh2.1.0.1</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>libthrift</artifactId>
+                        <groupId>org.apache.thrift</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.scala-lang</groupId>
@@ -78,6 +100,16 @@
                 <groupId>org.apache.parquet</groupId>
                 <artifactId>parquet-thrift</artifactId>
                 <version>${apache.parquet.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>protobuf-java</artifactId>
+                        <groupId>com.google.protobuf</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>libthrift</artifactId>
+                        <groupId>org.apache.thrift</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -175,6 +207,79 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>1.7.21</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xiaomi.misearch</groupId>
+                <artifactId>appsearch-thrift</artifactId>
+                <version>1.0.0</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>slf4j-api</artifactId>
+                        <groupId>org.slf4j</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.thrift</groupId>
+                        <artifactId>thrift</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.xiaomi</groupId>
+                <artifactId>xiaomi-common-thrift</artifactId>
+                <version>2.8.5</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.hadoop.zookeeper</groupId>
+                        <artifactId>zookeeper</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.zookeeper</groupId>
+                        <artifactId>zookeeper</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jboss.netty</groupId>
+                        <artifactId>netty</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-client</artifactId>
+                <version>2.6.0-mdh3.12.4-jre8</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.zookeeper</groupId>
+                        <artifactId>zookeeper</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.thrift</groupId>
+                        <artifactId>libthrift</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.thrift</groupId>
+                        <artifactId>thrift</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -298,6 +403,18 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.xiaomi.misearch</groupId>
+            <artifactId>appsearch-thrift</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.xiaomi</groupId>
+            <artifactId>xiaomi-common-thrift</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
         </dependency>
     </dependencies>
 
