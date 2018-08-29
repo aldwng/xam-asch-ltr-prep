@@ -9,7 +9,7 @@ object TextUtils extends Serializable {
 
   val natures = Array("n","nr","nr1","nr2","nrj","nrf","ns","nsf","nt","nt","nl","ng","nw", "v","vd","vn","vf","vx","vi", "vg")
 
-  val regexNum = "[^0-9]*".r
+  val nonNumericRegex = "[^0-9]*".r
 
   def tokenize(content: Seq[String]): Seq[String] = {
     content

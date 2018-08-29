@@ -298,17 +298,17 @@ object QueryExtGenerator {
         val query = x._1
         val queryExt = x._2.head._1
         val values = x._2.map(_._2).toSeq
-        var appIds = values.flatMap(_._1).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(50).map(_._1)
+        var appIds = values.flatMap(_._1).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1)
         var cate1 = values.flatMap(_._2).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(2).map(_._1)
         var cate2 = values.flatMap(_._3).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(4).map(_._1)
-        var tags = values.flatMap(_._4).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(60).map(_._1)
-        var keywords = values.flatMap(_._5).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(60).map(_._1)
-        var publisher = values.flatMap(_._6).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(50).map(_._1)
+        var tags = values.flatMap(_._4).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1)
+        var keywords = values.flatMap(_._5).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1)
+        var publisher = values.flatMap(_._6).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1)
         var folderTags = values.flatMap(_._7).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(10).map(_._1)
-        var relatedTags = values.flatMap(_._8).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(50).map(_._1)
-        var searchKeywords = values.flatMap(_._9).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(60).map(_._1)
+        var relatedTags = values.flatMap(_._8).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1)
+        var searchKeywords = values.flatMap(_._9).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1)
         var googleCates = values.flatMap(_._10).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(5).map(_._1)
-        var displayNames = values.flatMap(_._11).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(50).map(_._1).map(_.toLowerCase)
+        var displayNames = values.flatMap(_._11).map(_ -> 1).groupBy(_._1).toSeq.sortBy(-_._2.size).take(20).map(_._1).map(_.toLowerCase)
 
         if ((!displayNames.contains(query)) && broadCastedAppNameToTagsMap.value.contains(query)) {
           val (appIdsNew, tagsNew, keywordsNew, cate1New, cate2New, publisherNew, relatedTagsNew, folderTagsNew, searchKeywordsNew, googleCatesNew) = broadCastedAppNameToTagsMap.value(query)
@@ -368,9 +368,9 @@ object QueryExtGenerator {
   def calcQueryExtsTfIdf(data: RDD[(String, Seq[(String, Int)])]) = {
     val output = data.map {
       case (query, coClickQueries) =>
-        val terms = wordSegment(coClickQueries.mkString(" ") + " " + query)
+        val terms = wordSegment(coClickQueries.map(_._1).mkString(" ") + " " + query)
         val coClickQueryTerms = tokenize(terms)
-          .filter(regexNum.pattern.matcher(_).matches)
+          .filter(nonNumericRegex.pattern.matcher(_).matches)
           .map(x => x -> 1)
           .groupBy(_._1)
           .map(x => (x._1, x._2.size))

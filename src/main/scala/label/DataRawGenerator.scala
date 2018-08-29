@@ -120,7 +120,7 @@ object DataRawGenerator {
           label = 3
         } else if (downloadWeight > avg) {
           label = 2
-        } else if (downloadCount > 50) {
+        } else if (downloadCount > avg - std) {
           label = 1
         } else {
           label = 0

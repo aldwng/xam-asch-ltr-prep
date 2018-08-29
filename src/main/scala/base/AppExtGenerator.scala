@@ -22,7 +22,7 @@ object AppExtGenerator {
     val end = semanticDate(args.getOrElse("end", "-1"))
     val dev = args.getOrElse("dev", "false").toBoolean
 
-    var lastMonthLog = IntermediateDateIntervalPath(appstore_content_stats_path, start, end)
+    var lastWeekLog = IntermediateDateIntervalPath(appstore_content_stats_path, start, end)
     var appDataPath = app_data_parquet_path
     var appExtOutputPath = IntermediateDatePath(app_ext_parquet_path, end.toInt)
     var conf = new SparkConf()
@@ -30,7 +30,7 @@ object AppExtGenerator {
       .set("spark.sql.parquet.compression.codec", "snappy")
 
     if (dev) {
-      lastMonthLog = Seq(appstore_content_stats_path_local)
+      lastWeekLog = Seq(appstore_content_stats_path_local)
       appDataPath = app_data_parquet_path_local
       appExtOutputPath = app_ext_parquet_path_local
 
@@ -42,7 +42,7 @@ object AppExtGenerator {
       .config(conf)
       .getOrCreate()
 
-    val coClickQueries = calcCoClickQueryTfIdf(spark, lastMonthLog)
+    val coClickQueries = calcCoClickQueryTfIdf(spark, lastWeekLog)
 
     import spark.implicits._
     val apps = spark.read.parquet(appDataPath).as[App].rdd
