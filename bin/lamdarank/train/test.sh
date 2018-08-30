@@ -11,7 +11,7 @@ model="${DATA_PATH}/model.txt"
 jar="${DATA_PATH}/ranklib-2.10-snapshot.jar"
 
 JAVA="/usr/java/jdk1.8.0_144/bin/java"
-JAVA_OPTS="-Xms512M -Xmx10g"
+JAVA_OPTS="-Xms512M -Xmx5g"
 
 function run {
     ${JAVA} ${JAVA_OPTS} -jar ${jar} \

@@ -14,6 +14,10 @@ fi
 
 echo "train date: ${day}"
 
+export HADOOP_OPTS="-Dhadoop.property.hadoop.client.keytab.file=/etc/h_misearch.keytab \
+                    -Dhadoop.property.hadoop.client.kerberos.principal=h_misearch@XIAOMI.HADOOP"
+
+HADOOP_HOME="/home/work/tars/infra-client"
 HADOOP="${HADOOP_HOME}/bin/hadoop"
 C3_CLUSTER="--cluster c3prc-hadoop"
 

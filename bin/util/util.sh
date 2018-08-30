@@ -11,6 +11,8 @@ week=`date -d "$day -7 day" +%Y%m%d`
 
 echo "train: $month $week $day"
 
+export SPARK_SUBMIT_OPTS="-Dhadoop.property.hadoop.client.keytab.file=/etc/h_misearch.keytab \
+                          -Dhadoop.property.hadoop.client.kerberos.principal=h_misearch@XIAOMI.HADOOP"
 function run {
      /home/work/tars/infra-client/bin/spark-submit \
         --java 8 \
