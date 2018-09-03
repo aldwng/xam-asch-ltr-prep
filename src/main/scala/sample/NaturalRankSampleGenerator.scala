@@ -17,6 +17,7 @@ object NaturalRankSampleGenerator {
     val args = Args(mainArgs)
     val day = semanticDate(args.getOrElse("day", "-1"))
     val dev = args.getOrElse("dev", "false").toBoolean
+
     var feaPath = IntermediateDatePath(fea_map_path, day.toInt)
     var inputPath = IntermediateDatePath(predict_base_path, day.toInt)
     var queryPath = IntermediateDatePath(predict_query_map_path, day.toInt)

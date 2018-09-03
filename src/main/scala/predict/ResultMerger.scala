@@ -13,15 +13,15 @@ object ResultMerger {
     val day = semanticDate(args.getOrElse("day", "-1"))
     val dev = args.getOrElse("dev", "false").toBoolean
     var downloadHistoryPath = download_history_path
-    var reRankPath = IntermediateDatePath(predict_rerank_path, day.toInt)
-    var outputPath = IntermediateDatePath(predict_download_history_path, day.toInt)
+    var rankPath = IntermediateDatePath(predict_rank_path, day.toInt)
+    var outputPath = IntermediateDatePath(predict_rank_unified_path, day.toInt)
 
     var conf = new SparkConf().setAppName("Download History Rerank Job Job")
 
     if(dev) {
       downloadHistoryPath = download_history_path_local
-      reRankPath =  predict_rerank_path_local
-      outputPath = predict_download_history_path_local
+      rankPath =  predict_rank_path_local
+      outputPath =  predict_rank_unified_path_local
       conf.setMaster("local[*]")
     }
 
@@ -35,31 +35,35 @@ object ResultMerger {
     val downloadHistory = sc.textFile(downloadHistoryPath)
       .map(line => line.split("\t")(0) -> line)
 
-    val naturalReRank = sc.textFile(reRankPath)
+    val predictRank = sc.textFile(rankPath)
       .map(line => line.split(",")(0) -> line)
 
-    val result = downloadHistory.join(naturalReRank)
+    val result = downloadHistory.join(predictRank)
       .map {
-        case (query, (downloadsLine, rerankLine)) =>
-          val downloadsItems = downloadsLine.split("\t")
-          val searchCount = downloadsItems(1)
-          val downloadCount = downloadsItems(2)
-          val appDownloadsMap = downloadsItems(3).split(",")
+        case (query, (downloadHistoryLine, predictRankLine)) =>
+          val downloadHistoryItems = downloadHistoryLine.split("\t")
+          val searchCount = downloadHistoryItems(1)
+          val downloadCount = downloadHistoryItems(2)
+          val appDownloadMap = downloadHistoryItems(3).split(",")
             .map { line =>
-              val items = line.split("\\:")
-              (items(0), items(2))
+              val items = line.split(":")
+              val appId = items(0)
+              val downloadCount = items(2)
+              appId -> downloadCount
             }.toMap
-          val appReRankList = rerankLine.split(",")(1).split(";")
+
+          val predictRankItems = predictRankLine.split(",")(1).split(";")
             .map { line =>
-              val items = line.split("\\:")
+              val items = line.split(":")
               val appId = items(0)
               val rankScore = items(1).toDouble
-              val downloads = appDownloadsMap.getOrElse(appId, 0)
-              (appId, rankScore, downloads, rankScore)
+              val downloadCount = appDownloadMap.getOrElse(appId, 0)
+              (appId, rankScore, downloadCount, rankScore)
             }.sortBy(-_._2)
-          val test = appReRankList.map(tuple =>
+
+          val appInfos = predictRankItems.map(tuple =>
             tuple.productIterator.mkString(":"))
-          Array(query, searchCount, downloadCount, test.mkString(",")).mkString("\t")
+          Array(query, searchCount, downloadCount, appInfos.mkString(",")).mkString("\t")
       }
 
     val fs = FileSystem.get(new Configuration())

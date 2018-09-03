@@ -6,24 +6,30 @@ echo "bin dir: ${BIN_DIR}"
 
 source ${BIN_DIR}/util/util.sh
 
-run sample.NaturalSampleGenerator --day $day
-run sample.NaturalRankSampleGenerator --day $day
-run predict.ResultPredictor --day $day
-run predict.ResultMerger --day $day
-
-RERANK_PATH="/user/h_misearch/appmarket/rank/predict/download_history/date=$day"
-OUTPUT_HDFS_PATH="/user/h_misearch/appmarket/pipeline_data/app_ctr"
-OUTPUT_LOCAL_PATH="${BIN_DIR}/data"
-C3_CLUSTER="--cluster c3prc-hadoop"
-HADOOP_HOME="/home/work/tars/infra-client/bin/hadoop"
-
-# Fetch test data
-${HADOOP_HOME} ${C3_CLUSTER} fs -test -e ${RERANK_PATH}/_SUCCESS
-if [ $? -eq 0 ] ;then
-    ${HADOOP_HOME} ${C3_CLUSTER} fs -cat ${RERANK_PATH}/* > ${OUTPUT_LOCAL_PATH}/download_rerank.txt
-    ${HADOOP_HOME} ${C3_CLUSTER} fs -copyFromLocal -f ${OUTPUT_LOCAL_PATH}/download_rerank.txt ${OUTPUT_HDFS_PATH}/download_rerank.txt
-    echo "Generate download rerank data success."
-else
-    echo "Error! ${RERANK_PATH} is not exists."
+# JAVA8_HOME
+if [ -z "${JAVA8_HOME}" ]; then
+    JAVA8_HOME=/usr/java/jdk1.8.0_144
 fi
 
+echo ${JAVA8_HOME}
+
+# Prepare query data
+KBS_OPTS="-Djava.security.krb5.conf=/etc/krb5-hadoop.conf \
+          -Dhadoop.property.hadoop.security.authentication=kerberos \
+          -Dhadoop.property.hadoop.client.keytab.file=/etc/h_misearch.keytab \
+          -Dhadoop.property.hadoop.client.kerberos.principal=h_misearch@XIAOMI.HADOOP"
+
+${JAVA8_HOME}/bin/java \
+    -Xms512m -Xmx1g -cp appsearch-rank.jar ${KBS_OPTS} \
+    com.xiaomi.misearch.appsearch.rank.lamdarank.SearchResultFetcher
+
+# Predict
+run sample.NaturalSampleGenerator --day ${day}
+run sample.NaturalRankSampleGenerator --day ${day}
+run predict.ResultPredictor --day ${day}
+run predict.ResultMerger --day ${day}
+
+# Merge lamdarank result with download history, reserve top10 apps in lamdarank
+${JAVA8_HOME}/bin/java \
+    -Xms512m -Xmx2g -cp appsearch-rank.jar ${KBS_OPTS} \
+    com.xiaomi.misearch.appsearch.rank.lamdarank.SearchRankMerger ${day}

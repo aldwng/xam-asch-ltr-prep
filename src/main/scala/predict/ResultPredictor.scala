@@ -20,14 +20,14 @@ object ResultPredictor {
     var modelPath = model_path
     var samplePath = IntermediateDatePath(predict_sample_path, day.toInt)
     var queryMapPath = IntermediateDatePath(predict_query_map_path, day.toInt)
-    var outputPath = IntermediateDatePath(predict_rerank_path, day.toInt)
+    var outputPath = IntermediateDatePath(predict_rank_path, day.toInt)
 
-    var conf = new SparkConf().setAppName("Natural Result ReRank Job")
+    var conf = new SparkConf().setAppName("Predict Job")
     if (dev) {
       modelPath = model_path_local
       samplePath = predict_sample_path_local
       queryMapPath = predict_query_map_path_local
-      outputPath = predict_rerank_path_local
+      outputPath = predict_rank_path_local
       conf.setMaster("local[*]")
     }
 

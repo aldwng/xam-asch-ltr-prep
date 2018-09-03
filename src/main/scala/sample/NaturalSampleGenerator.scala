@@ -16,13 +16,9 @@ import utils.TextUtils._
 
 import scala.collection.JavaConverters._
 
-/**
-  * Created by yun on 18-1-24.
-  */
 object NaturalSampleGenerator {
 
   def main(mainArgs: Array[String]): Unit = {
-    //usage --day $day --all 1
     val args = Args(mainArgs)
     val day = semanticDate(args.getOrElse("day", "-1"))
     val dev = args.getOrElse("dev", "false").toBoolean
@@ -32,7 +28,6 @@ object NaturalSampleGenerator {
     var queryMapPath = IntermediateDatePath(predict_query_map_path, day.toInt)
     var naturalResultsPath = natural_results_path
     var outputPath = IntermediateDatePath(predict_base_path, day.toInt)
-
     var conf = new SparkConf().setAppName("Natural Result Rank Job")
 
     if (dev) {
@@ -63,29 +58,25 @@ object NaturalSampleGenerator {
       }
       .filter(naturalResult => nonBlank(naturalResult._1))
 
+    val fs = FileSystem.get(new Configuration())
+    fs.delete(new Path(queryMapPath), true)
     naturalResults.map {
-      case (query, id, appIds) =>
+      case (query, id, _) =>
         val ans = new QueryMap()
         ans.setQuery(query)
         ans.setId(id)
         ans
-    }
-      .saveAsParquetFile(queryMapPath)
+    }.saveAsParquetFile(queryMapPath)
 
-    val fs = FileSystem.get(new Configuration())
+    val output = generate(sc, appPath, queryPath, naturalResults)
     fs.delete(new Path(outputPath), true)
-
-    val output = generate(sc, appPath, queryPath, outputPath, naturalResults)
     output.saveAsParquetFile(outputPath)
+
     spark.stop()
     println("Job done!")
   }
 
-  def generate(sc: SparkContext,
-               appPath: String,
-               queryExtPath: String,
-               outputPath: String,
-               naturalResults: RDD[(String, Long, Seq[String])]): RDD[Sample] = {
+  def generate(sc: SparkContext, appPath: String, queryExtPath: String, naturalResults: RDD[(String, Long, Seq[String])]): RDD[Sample] = {
     val appExts = sc.thriftParquetFile(appPath, classOf[AppExt]).map(x => x.getAppId -> x).collectAsMap()
     val queryExts = sc.thriftParquetFile(queryExtPath, classOf[QueryExt])
       .map { x =>
