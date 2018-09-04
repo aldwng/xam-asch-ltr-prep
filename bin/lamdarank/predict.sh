@@ -43,14 +43,19 @@ run predict.ResultEvaluator --day ${day} --type unified
 run predict.ResultEvaluator --day ${day} --type merged
 
 # Sync to Download History directory
-HADOOP_HOME="/home/work/tars/infra-client"
+export HADOOP_OPTS="-Dhadoop.property.hadoop.client.keytab.file=/etc/h_misearch.keytab \
+                    -Dhadoop.property.hadoop.client.kerberos.principal=h_misearch@XIAOMI.HADOOP"
+
+if [ -z "${HADOOP_HOME}" ]; then
+    HADOOP_HOME="/home/work/tars/infra-client"
+fi
 HADOOP="${HADOOP_HOME}/bin/hadoop"
 ZJY_CLUSTER="--cluster zjyprc-hadoop"
 C3_CLUSTER="--cluster c3prc-hadoop"
 
 OUTPUT_RANK_DIR=/user/h_misearch/appmarket/pipeline_data/app_ctr/
-RANK_UNIFIED_PATH=/user/h_misearch/appmarket/rank/predict/rank_unified
-RANK_MERGED_FILE=/user/h_misearch/appmarket/rank/predict/rank_merged/rank_merged.txt
+RANK_UNIFIED_PATH=/user/h_misearch/appmarket/rank/predict/rank_unified/date=${day}
+RANK_MERGED_FILE=/user/h_misearch/appmarket/rank/predict/rank_merged/date=${day}/rank_merged.txt
 
 rm rank_unified.txt rank_merged.txt
 if (${HADOOP} ${C3_CLUSTER} fs -ls "${RANK_UNIFIED_PATH}/_SUCCESS"); then
