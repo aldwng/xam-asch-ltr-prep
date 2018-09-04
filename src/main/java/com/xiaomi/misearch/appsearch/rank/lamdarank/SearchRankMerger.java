@@ -144,8 +144,8 @@ public class SearchRankMerger {
           continue;
         }
 
-        Long downloadWeight = maxDownloadWeight + i;
-        appInfos.add(String.format("%s:%d:%d:%d", appId, downloadWeight, downloadCount, downloadWeight));
+        Long rankScore = maxDownloadWeight + i;
+        appInfos.add(String.format("%s:%d:%d:%d", appId, rankScore, downloadCount, rankScore));
       }
       result.put(query, appInfos);
     }

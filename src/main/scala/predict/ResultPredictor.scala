@@ -64,7 +64,7 @@ object ResultPredictor {
       .groupByKey()
       .mapValues(v => v.toSeq.sortBy(-_._1))
 
-    val reRank = preResult
+    val rankData = preResult
       .map { x =>
         var result = s"${queryMap(x._1)},"
         for (i <- x._2.indices) {
@@ -76,7 +76,7 @@ object ResultPredictor {
     val fs = FileSystem.get(new Configuration())
     fs.delete(new Path(outputPath), true)
 
-    reRank.repartition(1)
+    rankData.repartition(1)
       .saveAsTextFile(outputPath)
   }
 }

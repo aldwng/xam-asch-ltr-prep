@@ -75,6 +75,12 @@ object PathUtils {
   val predict_rank_merged_path = base_path + "/predict/rank_merged"
   val predict_rank_merged_path_local = base_path_local + "/predict/rank_merged"
 
+  val predict_evaluate_unified_path = base_path + "/predict/evaluate/unified"
+  val predict_evaluate_unified_path_local = base_path_local + "/predict/evaluate/unified"
+
+  val predict_evaluate_merged_path = base_path + "/predict/evaluate/merged"
+  val predict_evaluate_merged_path_local = base_path_local + "/predict/evaluate/merged"
+
   val DATE_PATTERN = "yyyyMMdd"
   val TIME_PATTERN = "HH:mm:ss"
   val DATE_TIME_PATTERN = s"$DATE_PATTERN $TIME_PATTERN"
