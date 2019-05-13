@@ -6,20 +6,19 @@ else
   day=$1
 fi
 
-month=`date -d "$day -30 day" +%Y%m%d`
 week=`date -d "$day -7 day" +%Y%m%d`
 
-echo "train: $month $week $day"
+echo "train: $week $day"
 
 export SPARK_SUBMIT_OPTS="-Dhadoop.property.hadoop.client.keytab.file=/etc/h_misearch.keytab \
                           -Dhadoop.property.hadoop.client.kerberos.principal=h_misearch@XIAOMI.HADOOP"
 function run {
      /home/work/tars/infra-client/bin/spark-submit \
         --java 8 \
-        --cluster c3prc-hadoop-spark2.1 \
+        --cluster zjyprc-hadoop-spark2.1 \
         --class "$1" \
         --master yarn-cluster \
-        --queue service.cloud_group.sns.queue_1 \
+        --queue root.service.cloud_group.sns.statistics \
         --num-executors 100 \
         --driver-memory 8g \
         --executor-memory 8g \

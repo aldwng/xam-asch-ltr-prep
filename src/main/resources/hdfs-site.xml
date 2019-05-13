@@ -19,38 +19,38 @@
 <configuration>
 
   <property>
-    <name>dfs.block.access.token.enable</name>
-    <value>true</value>
-  </property>
-
-  <property>
-    <name>dfs.block.local-path-access.user</name>
-    <value>work, hbase, hbase_srv, hbase_tst, hbase_prc, impala, sql_prc</value>
-  </property>
-
-  <property>
-    <name>dfs.block.replicator.classname</name>
-    <value>org.apache.hadoop.hdfs.server.blockmanagement.AvailableSpaceBlockPlacementPolicy</value>
-  </property>
-
-  <property>
-    <name>dfs.block.size</name>
-    <value>128m</value>
-  </property>
-
-  <property>
-    <name>dfs.blockreport.initialDelay</name>
-    <value>600</value>
-  </property>
-
-  <property>
-    <name>dfs.blocksize</name>
-    <value>256m</value>
-  </property>
-
-  <property>
     <name>dfs.client.failover.proxy.provider.c3prc-hadoop</name>
-    <value>org.apache.hadoop.hdfs.server.namenode.ha.ZkConfiguredFailoverProxyProvider</value>
+    <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+  </property>
+
+  <property>
+    <name>dfs.client.failover.proxy.provider.zjyprc-hadoop-0</name>
+    <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+  </property>
+
+  <property>
+    <name>dfs.client.failover.proxy.provider.zjyprc-hadoop-1</name>
+    <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+  </property>
+
+  <property>
+    <name>dfs.client.failover.proxy.provider.zjyprc-hadoop-2</name>
+    <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+  </property>
+
+  <property>
+    <name>dfs.client.failover.proxy.provider.zjyprc-hadoop-3</name>
+    <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+  </property>
+
+  <property>
+    <name>dfs.client.failover.proxy.provider.zjyprc-hadoop-4</name>
+    <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+  </property>
+
+  <property>
+    <name>dfs.client.failover.proxy.provider.zjyprc-hadoop-5</name>
+    <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
   </property>
 
   <property>
@@ -69,71 +69,6 @@
   </property>
 
   <property>
-    <name>dfs.cluster.administrators</name>
-    <value>hdfs_admin</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.address</name>
-    <value>0.0.0.0:11402</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-threshold</name>
-    <value>107374182400</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.balance.bandwidthPerSec</name>
-    <value>20971520</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.data.dir</name>
-    <value>/home/work/hdd1/hdfs/c3prc-hadoop/datanode,/home/work/hdd2/hdfs/c3prc-hadoop/datanode,/home/work/hdd3/hdfs/c3prc-hadoop/datanode,/home/work/hdd4/hdfs/c3prc-hadoop/datanode,/home/work/hdd5/hdfs/c3prc-hadoop/datanode,/home/work/hdd6/hdfs/c3prc-hadoop/datanode,/home/work/hdd7/hdfs/c3prc-hadoop/datanode,/home/work/hdd8/hdfs/c3prc-hadoop/datanode,/home/work/hdd9/hdfs/c3prc-hadoop/datanode,/home/work/hdd10/hdfs/c3prc-hadoop/datanode,/home/work/hdd11/hdfs/c3prc-hadoop/datanode,/home/work/hdd12/hdfs/c3prc-hadoop/datanode</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.data.dir.perm</name>
-    <value>700</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.du.reserved</name>
-    <value>53687091200</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.enable.raid.service</name>
-    <value>true</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.failed.volumes.tolerated</name>
-    <value>2</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.fsdataset.volume.choosing.policy</name>
-    <value>org.apache.hadoop.hdfs.server.datanode.fsdataset.AvailableSpaceVolumeChoosingPolicy</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.hdfs-blocks-metadata.enabled</name>
-    <value>true</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.http.address</name>
-    <value>0.0.0.0:11401</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.ipc.address</name>
-    <value>0.0.0.0:11400</value>
-  </property>
-
-  <property>
     <name>dfs.datanode.kerberos.principal</name>
     <value>hdfs_prc/hadoop@XIAOMI.HADOOP</value>
   </property>
@@ -144,63 +79,8 @@
   </property>
 
   <property>
-    <name>dfs.datanode.max.xcievers</name>
-    <value>4096</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.overused.freespace.threshold</name>
-    <value>107374182400</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.overused.percentage.threshold</name>
-    <value>90</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.reserved.space.block.number</name>
-    <value>200</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.scan.period.hours</name>
-    <value>-1</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.sync.behind.writes</name>
-    <value>true</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.synconclose</name>
-    <value>true</value>
-  </property>
-
-  <property>
     <name>dfs.domain.socket.path</name>
-    <value>/home/work/app/hdfs/c3prc-hadoop/datanode/dn_socket</value>
-  </property>
-
-  <property>
-    <name>dfs.ha.automatic-failover.enabled</name>
-    <value>true</value>
-  </property>
-
-  <property>
-    <name>dfs.ha.fencing.methods</name>
-    <value>sshfence&#xA;shell(/bin/true)</value>
-  </property>
-
-  <property>
-    <name>dfs.ha.fencing.ssh.connect-timeout</name>
-    <value>2000</value>
-  </property>
-
-  <property>
-    <name>dfs.ha.fencing.ssh.private-key-files</name>
-    <value>/home/work/.ssh/id_rsa</value>
+    <value>/home/work/app/hdfs/zjyprc-hadoop/datanode/dn_socket</value>
   </property>
 
   <property>
@@ -209,103 +89,33 @@
   </property>
 
   <property>
-    <name>dfs.ha.tail-edits.period</name>
-    <value>20</value>
+    <name>dfs.ha.namenodes.zjyprc-hadoop-0</name>
+    <value>host0,host1</value>
   </property>
 
   <property>
-    <name>dfs.ha.zkfc.port</name>
-    <value>11300</value>
+    <name>dfs.ha.namenodes.zjyprc-hadoop-1</name>
+    <value>host0,host1</value>
   </property>
 
   <property>
-    <name>dfs.hosts.exclude</name>
-    <value>/home/work/app/hdfs/c3prc-hadoop/namenode/excludes</value>
+    <name>dfs.ha.namenodes.zjyprc-hadoop-2</name>
+    <value>host0,host1</value>
   </property>
 
   <property>
-    <name>dfs.journalnode.edits.dir</name>
-    <value>/home/work/hdd/hdfs/c3prc-hadoop/journalnode</value>
+    <name>dfs.ha.namenodes.zjyprc-hadoop-3</name>
+    <value>host0,host1</value>
   </property>
 
   <property>
-    <name>dfs.journalnode.http-address</name>
-    <value>0.0.0.0:11101</value>
+    <name>dfs.ha.namenodes.zjyprc-hadoop-4</name>
+    <value>host0,host1</value>
   </property>
 
   <property>
-    <name>dfs.journalnode.kerberos.internal.spnego.principal</name>
-    <value>HTTP/hadoop@XIAOMI.HADOOP</value>
-  </property>
-
-  <property>
-    <name>dfs.journalnode.kerberos.principal</name>
-    <value>hdfs_prc/hadoop@XIAOMI.HADOOP</value>
-  </property>
-
-  <property>
-    <name>dfs.journalnode.keytab.file</name>
-    <value>/etc/hadoop/conf/hdfs_prc.keytab</value>
-  </property>
-
-  <property>
-    <name>dfs.journalnode.rpc-address</name>
-    <value>0.0.0.0:11100</value>
-  </property>
-
-  <property>
-    <name>dfs.metrics.percentiles.intervals</name>
-    <value>60,300,900</value>
-  </property>
-
-  <property>
-    <name>dfs.namenode.acls.enabled</name>
-    <value>true</value>
-  </property>
-
-  <property>
-    <name>dfs.namenode.avoid.read.stale.datanode</name>
-    <value>true</value>
-  </property>
-
-  <property>
-    <name>dfs.namenode.avoid.write.stale.datanode</name>
-    <value>true</value>
-  </property>
-
-  <property>
-    <name>dfs.namenode.check.stale.datanode</name>
-    <value>true</value>
-  </property>
-
-  <property>
-    <name>dfs.namenode.checkpoint.txns</name>
-    <value>2000000</value>
-  </property>
-
-  <property>
-    <name>dfs.namenode.delegation.token.max-lifetime</name>
-    <value>31536000000</value>
-  </property>
-
-  <property>
-    <name>dfs.namenode.fs-limits.max-directory-items</name>
-    <value>2097152</value>
-  </property>
-
-  <property>
-    <name>dfs.namenode.handler.count</name>
-    <value>128</value>
-  </property>
-
-  <property>
-    <name>dfs.namenode.http-address.c3prc-hadoop.host0</name>
-    <value>c3-hadoop-prc-ct04.bj:11201</value>
-  </property>
-
-  <property>
-    <name>dfs.namenode.http-address.c3prc-hadoop.host1</name>
-    <value>c3-hadoop-prc-ct05.bj:11201</value>
+    <name>dfs.ha.namenodes.zjyprc-hadoop-5</name>
+    <value>host0,host1</value>
   </property>
 
   <property>
@@ -324,83 +134,78 @@
   </property>
 
   <property>
-    <name>dfs.namenode.name.dir</name>
-    <value>/home/work/hdd/hdfs/c3prc-hadoop/namenode</value>
-  </property>
-
-  <property>
-    <name>dfs.namenode.replica.delete.randomly</name>
-    <value>true</value>
-  </property>
-
-  <property>
-    <name>dfs.namenode.replication.min</name>
-    <value>1</value>
-  </property>
-
-  <property>
     <name>dfs.namenode.rpc-address.c3prc-hadoop.host0</name>
-    <value>c3-hadoop-prc-ct04.bj:11200</value>
+    <value>c3-hadoop-prc-ct26.bj:11200</value>
   </property>
 
   <property>
     <name>dfs.namenode.rpc-address.c3prc-hadoop.host1</name>
-    <value>c3-hadoop-prc-ct05.bj:11200</value>
+    <value>c3-hadoop-prc-ct27.bj:11200</value>
   </property>
 
   <property>
-    <name>dfs.namenode.safemode.threshold-pct</name>
-    <value>0.99f</value>
+    <name>dfs.namenode.rpc-address.zjyprc-hadoop-0.host0</name>
+    <value>zjy-hadoop-prc-ct01.bj:11200</value>
   </property>
 
   <property>
-    <name>dfs.namenode.service.handler.count</name>
-    <value>32</value>
+    <name>dfs.namenode.rpc-address.zjyprc-hadoop-0.host1</name>
+    <value>zjy-hadoop-prc-ct02.bj:11200</value>
   </property>
 
   <property>
-    <name>dfs.namenode.servicerpc-address.c3prc-hadoop.host0</name>
-    <value>c3-hadoop-prc-ct04.bj:11202</value>
+    <name>dfs.namenode.rpc-address.zjyprc-hadoop-1.host0</name>
+    <value>zjy-hadoop-prc-ct03.bj:11210</value>
   </property>
 
   <property>
-    <name>dfs.namenode.servicerpc-address.c3prc-hadoop.host1</name>
-    <value>c3-hadoop-prc-ct05.bj:11202</value>
+    <name>dfs.namenode.rpc-address.zjyprc-hadoop-1.host1</name>
+    <value>zjy-hadoop-prc-ct04.bj:11210</value>
   </property>
 
   <property>
-    <name>dfs.namenode.shared.edits.dir</name>
-    <value>qjournal://c3-hadoop-prc-ct01.bj:11100;c3-hadoop-prc-ct02.bj:11100;c3-hadoop-prc-ct03.bj:11100;c3-hadoop-prc-ct04.bj:11100;c3-hadoop-prc-ct05.bj:11100/c3prc-hadoop</value>
+    <name>dfs.namenode.rpc-address.zjyprc-hadoop-2.host0</name>
+    <value>zjy-hadoop-prc-ct05.bj:11220</value>
   </property>
 
   <property>
-    <name>dfs.namenode.stale.datanode.interval</name>
-    <value>30000</value>
+    <name>dfs.namenode.rpc-address.zjyprc-hadoop-2.host1</name>
+    <value>zjy-hadoop-prc-ct06.bj:11220</value>
   </property>
 
   <property>
-    <name>dfs.namenode.upgrade.permission</name>
-    <value>0777</value>
+    <name>dfs.namenode.rpc-address.zjyprc-hadoop-3.host0</name>
+    <value>zjy-hadoop-prc-ct07.bj:11230</value>
+  </property>
+
+  <property>
+    <name>dfs.namenode.rpc-address.zjyprc-hadoop-3.host1</name>
+    <value>zjy-hadoop-prc-ct08.bj:11230</value>
+  </property>
+
+  <property>
+    <name>dfs.namenode.rpc-address.zjyprc-hadoop-4.host0</name>
+    <value>zjy-hadoop-prc-ct09.bj:11240</value>
+  </property>
+
+  <property>
+    <name>dfs.namenode.rpc-address.zjyprc-hadoop-4.host1</name>
+    <value>zjy-hadoop-prc-ct10.bj:11240</value>
+  </property>
+
+  <property>
+    <name>dfs.namenode.rpc-address.zjyprc-hadoop-5.host0</name>
+    <value>zjy-hadoop-prc-ct11.bj:11250</value>
+  </property>
+
+  <property>
+    <name>dfs.namenode.rpc-address.zjyprc-hadoop-5.host1</name>
+    <value>zjy-hadoop-prc-ct12.bj:11250</value>
   </property>
 
   <property>
     <name>dfs.nameservices</name>
-    <value>c3prc-hadoop</value>
-  </property>
-
-  <property>
-    <name>dfs.permissions</name>
-    <value>true</value>
-  </property>
-
-  <property>
-    <name>dfs.permissions.superuser</name>
-    <value>hdfs_admin</value>
-  </property>
-
-  <property>
-    <name>dfs.permissions.superusergroup</name>
-    <value>supergroup</value>
+    <value>zjyprc-hadoop-0,zjyprc-hadoop-1,zjyprc-hadoop-2,zjyprc-hadoop-3,zjyprc-hadoop-4,zjyprc-hadoop-5,c3prc-hadoop,zjyprc-xiaomi</value>
   </property>
 
   <property>
@@ -419,98 +224,244 @@
   </property>
 
   <property>
-    <name>dfs.ttlmanager.kerberos.internal.spnego.principal</name>
-    <value>HTTP/hadoop@XIAOMI.HADOOP</value>
+    <name>fs.hdfs.impl</name>
+    <value>org.apache.hadoop.hdfs.FederatedDFSFileSystem</value>
   </property>
 
   <property>
-    <name>dfs.ttlmanager.kerberos.principal</name>
-    <value>hdfs_prc/hadoop@XIAOMI.HADOOP</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./</name>
+    <value>hdfs://zjyprc-hadoop-0/</value>
   </property>
 
   <property>
-    <name>dfs.ttlmanager.keytab.file</name>
-    <value>/etc/hadoop/conf/hdfs_prc.keytab</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_appstore</name>
+    <value>hdfs://zjyprc-hadoop-4/user/h_appstore</value>
   </property>
 
   <property>
-    <name>dfs.web.authentication.kerberos.keytab</name>
-    <value>/etc/hadoop/conf/hdfs_prc.keytab</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_appstore_stats</name>
+    <value>hdfs://zjyprc-hadoop-4/user/h_appstore_stats</value>
   </property>
 
   <property>
-    <name>dfs.web.authentication.kerberos.principal</name>
-    <value>HTTP/hadoop@XIAOMI.HADOOP</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_browser</name>
+    <value>hdfs://zjyprc-hadoop-4/user/h_browser</value>
   </property>
 
   <property>
-    <name>dfs.web.ugi</name>
-    <value>hdfs,supergroup</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_data_platform/platform/appstore</name>
+    <value>hdfs://zjyprc-hadoop-4/user/h_data_platform/platform/appstore</value>
   </property>
 
   <property>
-    <name>dfs.webhdfs.enabled</name>
-    <value>true</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_data_platform/platform/browser</name>
+    <value>hdfs://zjyprc-hadoop-4/user/h_data_platform/platform/browser</value>
   </property>
 
   <property>
-    <name>fs.permissions.umask-mode</name>
-    <value>022</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_data_platform/platform/feeds</name>
+    <value>hdfs://zjyprc-hadoop-1/user/h_data_platform/platform/feeds</value>
   </property>
 
   <property>
-    <name>fs.trash.checkpoint.interval</name>
-    <value>1440</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_data_platform/platform/gamesdk</name>
+    <value>hdfs://zjyprc-hadoop-1/user/h_data_platform/platform/gamesdk</value>
   </property>
 
   <property>
-    <name>fs.trash.interval</name>
-    <value>10080</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_data_platform/platform/micloud</name>
+    <value>hdfs://zjyprc-hadoop-2/user/h_data_platform/platform/micloud</value>
   </property>
 
   <property>
-    <name>hadoop.proxyuser.impala.groups</name>
-    <value>*</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_data_platform/platform/miot</name>
+    <value>hdfs://zjyprc-hadoop-2/user/h_data_platform/platform/miot</value>
   </property>
 
   <property>
-    <name>hadoop.proxyuser.impala.hosts</name>
-    <value>*</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_data_platform/platform/miui</name>
+    <value>hdfs://zjyprc-hadoop-4/user/h_data_platform/platform/miui</value>
   </property>
 
   <property>
-    <name>hadoop.proxyuser.sql_prc.groups</name>
-    <value>*</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_data_platform/platform/miuiads</name>
+    <value>hdfs://zjyprc-hadoop-5/user/h_data_platform/platform/miuiads</value>
   </property>
 
   <property>
-    <name>hadoop.proxyuser.sql_prc.hosts</name>
-    <value>*</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_data_platform/platform/passport</name>
+    <value>hdfs://zjyprc-hadoop-2/user/h_data_platform/platform/passport</value>
   </property>
 
   <property>
-    <name>hadoop.security.group.mapping</name>
-    <value>org.apache.hadoop.security.ConfigurationBasedGroupsMapping</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_data_platform/platform/profile</name>
+    <value>hdfs://zjyprc-hadoop-3/user/h_data_platform/platform/profile</value>
   </property>
 
   <property>
-    <name>hadoop.security.group.mapping.file.name</name>
-    <value>/home/work/app/hdfs/c3prc-hadoop/namenode/hadoop-groups.conf</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_data_platform/platform/push</name>
+    <value>hdfs://zjyprc-hadoop-4/user/h_data_platform/platform/push</value>
   </property>
 
   <property>
-    <name>ignore.secure.ports.for.testing</name>
-    <value>true</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_data_platform/platform/tracking</name>
+    <value>hdfs://zjyprc-hadoop-5/user/h_data_platform/platform/tracking</value>
   </property>
 
   <property>
-    <name>net.topology.node.switch.mapping.impl</name>
-    <value>org.apache.hadoop.net.TableMapping</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_game</name>
+    <value>hdfs://zjyprc-hadoop-1/user/h_game</value>
   </property>
 
   <property>
-    <name>net.topology.table.file.name</name>
-    <value>/home/work/app/hdfs/c3prc-hadoop/namenode/rackinfo.txt</value>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_micloud_gc</name>
+    <value>hdfs://zjyprc-hadoop-2/user/h_micloud_gc</value>
   </property>
 
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_micloud_job</name>
+    <value>hdfs://zjyprc-hadoop-2/user/h_micloud_job</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_miot</name>
+    <value>hdfs://zjyprc-hadoop-2/user/h_miot</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_miui</name>
+    <value>hdfs://zjyprc-hadoop-4/user/h_miui</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_miui_ad</name>
+    <value>hdfs://zjyprc-hadoop-5/user/h_miui_ad</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_passport</name>
+    <value>hdfs://zjyprc-hadoop-2/user/h_passport</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_scribe/appstore</name>
+    <value>hdfs://zjyprc-hadoop-4/user/h_scribe/appstore</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_scribe/browser</name>
+    <value>hdfs://zjyprc-hadoop-4/user/h_scribe/browser</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_scribe/feeds</name>
+    <value>hdfs://zjyprc-hadoop-1/user/h_scribe/feeds</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_scribe/game</name>
+    <value>hdfs://zjyprc-hadoop-1/user/h_scribe/game</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_scribe/game-center</name>
+    <value>hdfs://zjyprc-hadoop-1/user/h_scribe/game-center</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_scribe/gamesdk</name>
+    <value>hdfs://zjyprc-hadoop-1/user/h_scribe/gamesdk</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_scribe/micloud</name>
+    <value>hdfs://zjyprc-hadoop-2/user/h_scribe/micloud</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_scribe/miliao_legacy</name>
+    <value>hdfs://zjyprc-hadoop-1/user/h_scribe/miliao_legacy</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_scribe/miot</name>
+    <value>hdfs://zjyprc-hadoop-2/user/h_scribe/miot</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_scribe/miui</name>
+    <value>hdfs://zjyprc-hadoop-4/user/h_scribe/miui</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_scribe/miuiads</name>
+    <value>hdfs://zjyprc-hadoop-5/user/h_scribe/miuiads</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_scribe/passport</name>
+    <value>hdfs://zjyprc-hadoop-2/user/h_scribe/passport</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_scribe/profile</name>
+    <value>hdfs://zjyprc-hadoop-3/user/h_scribe/profile</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_scribe/push</name>
+    <value>hdfs://zjyprc-hadoop-4/user/h_scribe/push</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_scribe/tracking</name>
+    <value>hdfs://zjyprc-hadoop-5/user/h_scribe/tracking</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_scribe/xmpush</name>
+    <value>hdfs://zjyprc-hadoop-4/user/h_scribe/xmpush</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/h_sns</name>
+    <value>hdfs://zjyprc-hadoop-2/user/h_sns</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./yarn</name>
+    <value>hdfs://zjyprc-hadoop-1/yarn</value>
+  </property>
+
+  <property>
+    <name>fs.viewfs.mounttable.zjyprc-hadoop.link./user/s_feeds</name>
+    <value>hdfs://zjyprc-hadoop-1/user/s_feeds</value>
+  </property>
+
+  <property>
+    <name>dfs.client.zookeeper.observer</name>
+    <value>zjyprc.observer.zk.hadoop.srv:11000</value>
+  </property>
+
+  <property>
+    <name>dfs.federation.client.link.blocks.timeout.ms</name>
+    <value>180000</value>
+  </property>
+  <!-- zjyprc-xiaomi hbase -->
+  <property>
+    <name>dfs.client.failover.proxy.provider.zjyprc-xiaomi</name>
+    <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+  </property>
+  <property>
+    <name>dfs.ha.namenodes.zjyprc-xiaomi</name>
+    <value>host0,host1</value>
+  </property>
+  <property>
+    <name>dfs.namenode.rpc-address.zjyprc-xiaomi.host0</name>
+    <value>zjy-hadoop-prc-zk04.bj:22200</value>
+  </property>
+  <property>
+    <name>dfs.namenode.rpc-address.zjyprc-xiaomi.host1</name>
+    <value>zjy-hadoop-prc-zk05.bj:22200</value>
+  </property>
 </configuration>

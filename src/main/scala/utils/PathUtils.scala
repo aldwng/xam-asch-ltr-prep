@@ -6,47 +6,35 @@ import org.joda.time.{DateTime, Days}
 
 object PathUtils {
 
-  val base_path = "/user/h_misearch/appmarket/rank"
+  val base_path = "/user/h_misearch/appmarket/lambdarank"
   val base_path_local = "/tmp/appsearch"
 
-  val app_data_path = "/user/h_misearch/appmarket/pipeline_data/app_common/app_common.txt"
-  val app_data_path_local = base_path_local + "/base/app_common.txt"
+  val app_common_path = "/user/h_misearch/appmarket/pipeline_data/app_common/app_common.txt"
+  val app_common_path_local = base_path_local + "/app_common.txt"
 
-  val category_path = base_path + "/base/category.txt"
-  val category_path_local = base_path_local + "/base/category.txt"
+  val category_path = base_path + "/category.txt"
+  val category_path_local = base_path_local + "/category.txt"
 
-  val app_data_parquet_path = base_path + "/base/app"
-  val app_data_parquet_path_local = base_path_local + "/base/app"
+  val app_data_path = base_path + "/app"
+  val app_data_path_local = base_path_local + "/app"
 
-  val app_ext_parquet_path = base_path + "/base/app_ext"
-  val app_ext_parquet_path_local = base_path_local + "/base/app_ext"
+  val label_path = base_path + "/label"
+  val label_path_local = base_path_local + "/label"
 
-  val query_ext_path = base_path + "/base/query_ext"
-  val query_ext_path_local = base_path_local + "/base/query_ext"
+  val query_data_path = base_path + "/query"
+  val query_data_path_local = base_path_local + "/query"
 
-  val query_map_path = base_path + "/train/query_map"
-  val query_map_path_local = base_path_local + "/train/query_map"
+  val sample_path = base_path + "/sample/sample"
+  val sample_path_local = base_path_local + "/sample/sample"
 
-  val date_raw_path = base_path + "/train/data_raw"
-  val data_raw_path_local = base_path_local + "/train/data_raw"
-
-  val rank_instance_path = base_path + "/train/rank_instance"
-  val rank_instance_path_local = base_path_local + "/train/rank_instance"
-
-  val sample_path = base_path + "/train/sample"
-  val sample_path_local = base_path_local + "/train/sample"
-
-  val fea_map_path = base_path + "/train/fea_map"
-  val fea_map_path_local = base_path_local + "/train/fea_map"
-
-  val fea_text_path = base_path + "/train/fea_text"
-  val fea_text_path_local = base_path_local + "/train/fea_text"
-
-  val rank_sample_path = base_path + "/train/rank_sample"
-  val rank_sample_path_local = base_path_local + "/train/rank_sample"
+  val sample_text_path = base_path + "/sample/text"
+  val sample_text_path_local = base_path_local + "/sample/text"
 
   val appstore_content_stats_path = "/user/h_data_platform/platform/appstore/appstore_content_statistics"
   val appstore_content_stats_path_local = base_path_local + "/stats/content"
+
+  val market_search_result_path = "/user/h_misearch/appmarket/crawler"
+  val market_search_result_path_local = base_path_local
 
   val download_history_path = "/user/h_misearch/appmarket/pipeline_data/app_ctr/download_history.txt"
   val download_history_path_local = base_path_local + "/download_history.txt"
