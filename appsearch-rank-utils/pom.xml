@@ -13,7 +13,7 @@
     <dependencies>
         <dependency>
             <groupId>org.ansj</groupId>
-            <artifactId>matrix-ansj</artifactId>
+            <artifactId>ansj_seg</artifactId>
         </dependency>
 
         <dependency>

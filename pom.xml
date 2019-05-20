@@ -17,7 +17,7 @@
 
     <scm>
         <developerConnection>
-            scm:git:git@git.n.xiaomi.com:misearch/cantor.git
+            scm:git:git@v9.git.n.xiaomi.com:misearch/appsearch-rank.git
         </developerConnection>
         <tag>HEAD</tag>
     </scm>
@@ -211,8 +211,8 @@
 
             <dependency>
                 <groupId>org.ansj</groupId>
-                <artifactId>matrix-ansj</artifactId>
-                <version>5.1.5-alpha-SNAPSHOT</version>
+                <artifactId>ansj_seg</artifactId>
+                <version>5.1.6</version>
             </dependency>
 
             <dependency>
@@ -433,12 +433,25 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.5.3</version>
+                    <configuration>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <useReleaseProfile>false</useReleaseProfile>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
