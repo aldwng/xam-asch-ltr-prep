@@ -105,35 +105,35 @@ public class App implements Serializable {
     this.level2Category = level2Category;
   }
 
-  public Double getAppActiveRank() {
+  public double getAppActiveRank() {
     return appActiveRank;
   }
 
-  public void setAppActiveRank(Double appActiveRank) {
+  public void setAppActiveRank(double appActiveRank) {
     this.appActiveRank = appActiveRank;
   }
 
-  public Double getAppCdr() {
+  public double getAppCdr() {
     return appCdr;
   }
 
-  public void setAppCdr(Double appCdr) {
+  public void setAppCdr(double appCdr) {
     this.appCdr = appCdr;
   }
 
-  public Double getAppDownloadRank() {
+  public double getAppDownloadRank() {
     return appDownloadRank;
   }
 
-  public void setAppDownloadRank(Double appDownloadRank) {
+  public void setAppDownloadRank(double appDownloadRank) {
     this.appDownloadRank = appDownloadRank;
   }
 
-  public Double getAppRank() {
+  public double getAppRank() {
     return appRank;
   }
 
-  public void setAppRank(Double appRank) {
+  public void setAppRank(double appRank) {
     this.appRank = appRank;
   }
 }

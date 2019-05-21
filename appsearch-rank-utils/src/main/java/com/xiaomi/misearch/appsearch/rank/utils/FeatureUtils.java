@@ -45,21 +45,21 @@ public class FeatureUtils {
     features.add(new Feature(FeatureName.app_download_rank, app.getAppDownloadRank()));
     features.add(new Feature(FeatureName.app_cdr, app.getAppCdr()));
     features.add(new Feature(FeatureName.app_rank, app.getAppRank()));
-    features.add(new Feature(FeatureName.app_dn_len, displayName.length()));
+    features.add(new Feature(FeatureName.app_dn_len, StringUtils.isEmpty(displayName) ? 0f : displayName.length()));
     features.add(new Feature(FeatureName.app_dn_chinese_char_ratio, calcChineseRatio(displayName)));
     features.add(new Feature(FeatureName.app_dn_english_char_ratio, calcEnglishRatio(displayName)));
 
-    features.add(new Feature(FeatureName.query_len, query.length()));
+    features.add(new Feature(FeatureName.query_len, StringUtils.isEmpty(query) ? 0f : query.length()));
     features.add(new Feature(FeatureName.query_chinese_char_ratio, calcChineseRatio(query)));
     features.add(new Feature(FeatureName.query_english_char_ratio, calcEnglishRatio(query)));
 
-    if (query.equals(displayName)) {
+    if (StringUtils.equals(query, displayName)) {
       features.add(new Feature(FeatureName.query_app_dn_match, 1.0f));
     } else {
       features.add(new Feature(FeatureName.query_app_dn_match, 0f));
     }
 
-    if (query.contains(displayName) || displayName.contains(query)) {
+    if (StringUtils.contains(query, displayName) || StringUtils.contains(displayName, query)) {
       features.add(new Feature(FeatureName.query_app_dn_contains, 1.0f));
     } else {
       features.add(new Feature(FeatureName.query_app_dn_contains, 0f));
@@ -79,7 +79,7 @@ public class FeatureUtils {
     features.add(new Feature(FeatureName.query_app_brief_tri_dice, calcDiceScore(3, query, brief)));
     features.add(new Feature(FeatureName.query_app_brief_seg_dice, calcDiceScore(querySeg, briefSeg)));
 
-    if (query.contains(level1Cate) || level1Cate.contains(query)) {
+    if (StringUtils.contains(query, level1Cate)) {
       features.add(new Feature(FeatureName.query_app_level1_cate_contains, 1.0f));
     } else {
       features.add(new Feature(FeatureName.query_app_level1_cate_contains, 0f));
@@ -92,7 +92,7 @@ public class FeatureUtils {
     features.add(new Feature(FeatureName.query_app_level1_cate_tri_dice, calcDiceScore(3, query, level1Cate)));
     features.add(new Feature(FeatureName.query_app_level1_cate_seg_dice, calcDiceScore(querySeg, level1CateSeg)));
 
-    if (query.contains(level2Cate) || level2Cate.contains(query)) {
+    if (StringUtils.contains(query, level2Cate)) {
       features.add(new Feature(FeatureName.query_app_level2_cate_contains, 1.0f));
     } else {
       features.add(new Feature(FeatureName.query_app_level2_cate_contains, 0f));
@@ -112,7 +112,10 @@ public class FeatureUtils {
     features.add(new Feature(FeatureName.query_app_keywords_tri_dice_sum, calcDiceScoreSum(3, query, keywords)));
     features.add(new Feature(FeatureName.query_app_keywords_overlap, calcTagOverlapRatio(query, keywords)));
 
-    Set<String> pnSeg = new HashSet<>(Arrays.asList(app.getPackageName().split("\\.")));
+    Set<String> pnSeg = SetUtils.EMPTY_SET;
+    if (StringUtils.isNotEmpty(app.getPackageName())) {
+      pnSeg = new HashSet<>(Arrays.asList(app.getPackageName().split("\\.")));
+    }
     features.add(new Feature(FeatureName.query_app_pn_seg_jac, calcJaccardScore(querySeg, pnSeg)));
     features.add(new Feature(FeatureName.query_app_pn_seg_dice, calcDiceScore(querySeg, pnSeg)));
     return features;
@@ -128,6 +131,9 @@ public class FeatureUtils {
   }
 
   private static double calcJaccardScore(int num, String text1, String text2) {
+    if (StringUtils.isEmpty(text1) || StringUtils.isEmpty(text2)) {
+      return 0f;
+    }
     if (text1.length() >= num || text2.length() >= num) {
       Jaccard jaccard = new Jaccard(num);
       return jaccard.similarity(text1, text2);
@@ -146,6 +152,9 @@ public class FeatureUtils {
   }
 
   private static double calcDiceScore(int num, String text1, String text2) {
+    if (StringUtils.isEmpty(text1) || StringUtils.isEmpty(text2)) {
+      return 0f;
+    }
     if (text1.length() >= num || text2.length() >= num) {
       SorensenDice dice = new SorensenDice(num);
       return dice.similarity(text1, text2);
@@ -165,7 +174,7 @@ public class FeatureUtils {
 
 
   private static double calcTagOverlapRatio(String text, List<String> tags) {
-    if (CollectionUtils.isEmpty(tags)) {
+    if (CollectionUtils.isEmpty(tags) || StringUtils.isEmpty(text)) {
       return 0f;
     }
 
