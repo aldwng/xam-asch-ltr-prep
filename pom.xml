@@ -4,7 +4,7 @@
 
     <groupId>com.xiaomi.misearch</groupId>
     <artifactId>appsearch-rank</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.3</version>
     <packaging>pom</packaging>
     <name>App Search Rank</name>
 
@@ -17,7 +17,7 @@
         <developerConnection>
             scm:git:git@v9.git.n.xiaomi.com:misearch/appsearch-rank.git
         </developerConnection>
-        <tag>HEAD</tag>
+        <tag>appsearch-rank-0.0.3</tag>
     </scm>
 
     <distributionManagement>
@@ -46,7 +46,7 @@
             <dependency>
                 <groupId>com.xiaomi.misearch</groupId>
                 <artifactId>appsearch-rank-utils</artifactId>
-                <version>0.0.3-SNAPSHOT</version>
+                <version>0.0.3</version>
             </dependency>
 
             <dependency>
