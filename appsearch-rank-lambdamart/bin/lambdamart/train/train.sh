@@ -30,7 +30,7 @@ jar="${DATA_PATH}/RankLib-1.0.0-mdf-2.11-SNAPSHOT.jar"
 model="${DATA_PATH}/model.txt"
 rm ${model}
 
-JAVA="/usr/java/jdk1.8.0_144/bin/java"
+JAVA="/usr/java/openjdk1.8.0_202/bin/java"
 JAVA_OPTS="-Xms1g -Xmx15g"
 
 function run {
