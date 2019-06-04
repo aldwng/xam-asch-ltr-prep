@@ -42,32 +42,9 @@ object PathUtils {
   val model_path = base_path + "/model/model.txt"
   val model_path_local = base_path_local + "/model/model.txt"
 
-  val natural_results_path = base_path + "/predict/natural_results.txt"
-  val natural_results_path_local = base_path_local + "/predict/natural_results.txt"
+  var rank_diff_path = base_path + "/diff"
+  var rank_diff_path_local = base_path_local + "/diff"
 
-  val predict_base_path = base_path + "/predict/base"
-  val predict_base_path_local = base_path_local + "/predict/base"
-
-  val predict_query_map_path = base_path + "/predict/query_map"
-  val predict_query_map_path_local = base_path_local + "/predict/query_map"
-
-  val predict_rank_path = base_path + "/predict/rank"
-  val predict_rank_path_local = base_path_local + "/predict/rank"
-
-  val predict_sample_path = base_path + "/predict/sample"
-  val predict_sample_path_local = base_path_local + "/predict/sample"
-
-  val predict_rank_unified_path = base_path + "/predict/rank_unified"
-  val predict_rank_unified_path_local = base_path_local + "/predict/rank_unified"
-
-  val predict_rank_merged_path = base_path + "/predict/rank_merged"
-  val predict_rank_merged_path_local = base_path_local + "/predict/rank_merged"
-
-  val predict_evaluate_unified_path = base_path + "/predict/evaluate/unified"
-  val predict_evaluate_unified_path_local = base_path_local + "/predict/evaluate/unified"
-
-  val predict_evaluate_merged_path = base_path + "/predict/evaluate/merged"
-  val predict_evaluate_merged_path_local = base_path_local + "/predict/evaluate/merged"
 
   val DATE_PATTERN = "yyyyMMdd"
   val TIME_PATTERN = "HH:mm:ss"
