@@ -2,6 +2,7 @@ package tool
 
 import com.twitter.scalding.Args
 import model.AppRaw
+import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.broadcast.Broadcast
@@ -13,8 +14,8 @@ import utils.PathUtils._
 /**
   * Compare two rank results, params
   * --dev false/false
-  * --ranka rank a filename
-  * --rankb rank b filename
+  * --ranka rank a filename, file format: ${query}\t${searchCount}\t${appId,appId, ...}
+  * --rankb rank b filename, file format: ${query}\t${searchCount}\t${appId,appId, ...}
   *
   * @author Shenglan Wang
   */
@@ -58,14 +59,13 @@ object RankComparator {
     val rankAData = parseRankResultFile(sc, rankAFile, appIdToTitleMap)
     val rankBData = parseRankResultFile(sc, rankBFile, appIdToTitleMap)
 
-    val result = rankAData.join(rankBData).map {
-      case (_, (data1, data2)) =>
-        (data1, data2).productIterator.mkString("\n")
-    }
-
     val fs = FileSystem.get(new Configuration())
     fs.delete(new Path(outputPath), true)
-    result.coalesce(1).saveAsTextFile(outputPath)
+    rankAData.join(rankBData).map {
+      case ((query, weight), (data1, data2)) =>
+        ((query, weight), (data1, data2).productIterator.mkString("\n"))
+    }.repartition(1).sortBy(_._1._2, false).map(_._2).saveAsTextFile(outputPath)
+
     spark.stop()
     println("Job done!")
   }
@@ -104,14 +104,19 @@ object RankComparator {
 
   def parseRankResultFile(sc: SparkContext, rankFilePath: String, appIdToTitleMap: Broadcast[scala.collection.Map[String, String]]) = {
     sc.textFile(rankFilePath).map(line => {
-      val items = line.split(":")
-      val query = items(0)
-      val ids = items(1).split(",").take(10)
-      val titles = for (id <- ids) yield {
-        appIdToTitleMap.value.getOrElse(id, "")
+      val items = line.split("\t")
+      if (items.length == 3) {
+        val query = items(0)
+        val weight = items(1).toInt
+        val ids = items(2).split(",").take(10)
+        val titles = for (id <- ids) yield {
+          appIdToTitleMap.value.getOrElse(id, "")
+        }
+        (query, weight) -> (query, weight, titles.mkString(", ")).productIterator.mkString("\t")
+      } else {
+        ("", 0) -> ""
       }
-      query -> (query, titles.mkString(", ")).productIterator.mkString("\t")
-    })
+    }).filter(x => StringUtils.isNotBlank(x._2))
   }
 }
 
