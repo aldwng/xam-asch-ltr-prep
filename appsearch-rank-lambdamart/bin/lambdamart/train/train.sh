@@ -31,6 +31,13 @@ model="${DATA_PATH}/model.txt"
 rm ${model}
 
 JAVA="/usr/java/openjdk1.8.0_202/bin/java"
+if [ -n "${JAVA8_HOME}" ]; then
+    JAVA=${JAVA8_HOME}/bin/java
+elif [ -n "${JAVA_HOME}" ]; then
+    JAVA=${JAVA_HOME}/bin/java
+fi
+echo ${JAVA}
+
 JAVA_OPTS="-Xms1g -Xmx15g"
 
 function run {
@@ -55,11 +62,17 @@ ${JAVA} ${JAVA_OPTS} -jar ${jar} \
 if [ -e "${train}" ] && [ -e "${test}" ] && [ -e "${jar}" ];
 then
   run
+  if [ $? -eq 0 ]; then
+      echo "train model suc: ${day}"
+  else
+      echo "train model fail: ${day}"
+  fi
+
   ${HADOOP} ${ZJY_CLUSTER} fs -put -f ${model} /user/h_misearch/appmarket/lambdarank/model/model.txt
   ${HADOOP} ${ZJY_CLUSTER} fs -put -f ${model} /user/h_misearch/appmarket/lambdarank/model/model.txt.${day}
   echo "Upload model.txt success!"
 else
-    echo "Error! model train data files are not exist!"
+  echo "Error! model train data files are not exist!"
 fi
 
 
