@@ -9,7 +9,7 @@ import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
-import utils.PathUtils._
+import utils.Paths._
 
 /**
   * Compare two rank results, params

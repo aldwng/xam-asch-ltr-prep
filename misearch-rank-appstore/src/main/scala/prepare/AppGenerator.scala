@@ -8,7 +8,8 @@ import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
-import utils.PathUtils._
+import utils.Paths._
+import com.xiaomi.misearch.rank.utils.PathUtils._
 
 object AppGenerator {
 
@@ -21,7 +22,7 @@ object AppGenerator {
 
     var categoryPath = category_path
     var inputPath = app_common_path
-    var outputPath = IntermediateDatePath(app_data_path, day.toInt)
+    var outputPath = intermediateDatePath(app_data_path, day.toInt)
     var conf = new SparkConf().setAppName(AppGenerator.getClass.getName)
     if (dev) {
       categoryPath = category_path_local

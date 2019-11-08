@@ -4,7 +4,7 @@ import com.xiaomi.misearch.rank.appstore.common.model.App
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import org.apache.spark.broadcast.Broadcast
-import utils.PathUtils.nonBlank
+import utils.Paths.nonBlank
 
 import scala.collection.JavaConverters._
 

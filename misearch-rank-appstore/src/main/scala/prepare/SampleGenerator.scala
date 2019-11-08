@@ -11,7 +11,8 @@ import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
-import utils.PathUtils._
+import utils.Paths._
+import com.xiaomi.misearch.rank.utils.PathUtils._
 
 /**
   * @author Shenglan Wang
@@ -25,9 +26,9 @@ object SampleGenerator {
 
     var appDataPath = app_data_path
     var queryDataPath = query_data_path
-    var labelPath = IntermediateDatePath(label_path, day.toInt)
-    var sampleOutputPath = IntermediateDatePath(sample_path, day.toInt)
-    var sampleTextOutputPath = IntermediateDatePath(sample_text_path, day.toInt)
+    var labelPath = intermediateDatePath(label_path, day.toInt)
+    var sampleOutputPath = intermediateDatePath(sample_path, day.toInt)
+    var sampleTextOutputPath = intermediateDatePath(sample_text_path, day.toInt)
     var conf = new SparkConf().setAppName(SampleGenerator.getClass.getName)
 
     if (dev) {

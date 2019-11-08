@@ -3,10 +3,9 @@ package prepare
 import com.twitter.scalding.Args
 import com.xiaomi.misearch.rank.appstore.common.model.App
 import com.xiaomi.misearch.rank.appstore.model.MarketSearchResult
+import com.xiaomi.misearch.rank.utils.SerializationUtils
 import com.xiaomi.misearch.rank.utils.hdfs.HdfsAccessor
 import model.AppStoreContentStatistics
-import com.xiaomi.misearch.rank.utils.SerializationUtils
-import com.xiaomi.misearch.rank.appstore.common.model
 import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
@@ -15,10 +14,11 @@ import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 import utils.MathUtils.computeStandardDeviation
-import utils.PathUtils._
+import utils.Paths._
 
 import scala.collection.JavaConverters._
 import scala.util.matching.Regex
+import com.xiaomi.misearch.rank.utils.PathUtils._
 
 object LabelGenerator {
 
@@ -30,11 +30,11 @@ object LabelGenerator {
     val end = semanticDate(args.getOrElse("end", "-1"))
     val dev = args.getOrElse("dev", "false").toBoolean
 
-    var appstoreContentLog = IntermediateDateIntervalPath(appstore_content_stats_path, start, end)
+    var appstoreContentLog = intermediateDateIntervalPath(appstore_content_stats_path, start, end)
     var appDataPath = app_data_path
     var marketSearchResultPath = market_search_result_path
-    var queryDataOutputPath = IntermediateDatePath(query_data_path, end.toInt)
-    var labelOutputPath = IntermediateDatePath(label_path, end.toInt)
+    var queryDataOutputPath = intermediateDatePath(query_data_path, end.toInt)
+    var labelOutputPath = intermediateDatePath(label_path, end.toInt)
     var conf = new SparkConf()
       .setAppName(LabelGenerator.getClass.getName)
 
