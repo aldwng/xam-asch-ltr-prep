@@ -22,4 +22,10 @@ object Paths {
 
   val QQ_RANK_PATH = BASE_DIR + "/qq_rank.txt"
   val QQ_RANK_PATH_LOCAL = BASE_DIR_LOCAL + "/qq_rank.txt"
+
+  val LABEL_PATH = BASE_DIR + "/label"
+  val LABEL_PATH_LOCAL = BASE_DIR_LOCAL + "/label"
+
+  val ZIPPED_QUERY_PATH = BASE_DIR + "/zip_query"
+  val ZIPPED_QUERY_PATH_LOCAL = BASE_DIR_LOCAL + "/zip_query"
 }

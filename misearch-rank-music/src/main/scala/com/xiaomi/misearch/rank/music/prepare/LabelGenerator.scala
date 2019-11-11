@@ -17,7 +17,7 @@ import scala.util.control._
 /**
   * @author Shenglan Wang
   */
-object MusicLogAnalyser {
+object LabelGenerator {
 
   def main(mainArgs: Array[String]): Unit = {
     val args = Args(mainArgs)
@@ -26,17 +26,23 @@ object MusicLogAnalyser {
     val dev = args.getOrElse("dev", "false").toBoolean
 
     var musicSearchLog = intermediateDateIntervalPath(Paths.MUSIC_SEARCH_LOG, start, end)
-    var musicDataPath = intermediateDatePath(Paths.MUSIC_DATA_PATH, end.toInt)
-    var queryPath = intermediateDatePath(Paths.QUERY_PATH, end.toInt)
     var qqRankPath = Paths.QQ_RANK_PATH
+
+    var musicDataOutputPath = intermediateDatePath(Paths.MUSIC_DATA_PATH, end.toInt)
+    var labelOutputPath = intermediateDatePath(Paths.LABEL_PATH, end.toInt)
+    var queryOutputPath = intermediateDatePath(Paths.QUERY_PATH, end.toInt)
+    var zippedQueryOutputPath = intermediateDatePath(Paths.ZIPPED_QUERY_PATH, end.toInt)
     var conf = new SparkConf()
-      .setAppName(MusicLogAnalyser.getClass.getName)
+      .setAppName(LabelGenerator.getClass.getName)
 
     if (dev) {
       musicSearchLog = Seq(Paths.MUSIC_SEARCH_LOG_LOCAL)
-      musicDataPath = Paths.MUSIC_DATA_PATH_LOCAL
-      queryPath = Paths.QUERY_PATH_LOCAL
       qqRankPath = Paths.QQ_RANK_PATH_LOCAL
+
+      musicDataOutputPath = Paths.MUSIC_DATA_PATH_LOCAL
+      labelOutputPath = Paths.LABEL_PATH_LOCAL
+      queryOutputPath = Paths.QUERY_PATH_LOCAL
+      zippedQueryOutputPath = Paths.ZIPPED_QUERY_PATH_LOCAL
       conf = conf.setMaster("local[*]")
     }
 
@@ -46,17 +52,73 @@ object MusicLogAnalyser {
       .getOrCreate()
 
     val qqRankMap = getQQRankMap(qqRankPath, spark)
-    val data = analysis(spark, musicSearchLog, qqRankMap)
+    val musicData = analysisLog(spark, musicSearchLog, qqRankMap)
+    println("Music Data count: " + musicData.count())
 
-    println("lines: " + data.count())
+    val labelData = musicData.map(x => labelMusicData(x)).filter(_._3 > 0)
+    println("Label Data count: " + labelData.count())
+
+    // Music Data
     val fs = FileSystem.get(new Configuration())
-    fs.delete(new Path(musicDataPath), true)
-    data.map(x => SerializationUtils.toJson(x)).repartition(1).saveAsTextFile(musicDataPath)
+    fs.delete(new Path(musicDataOutputPath), true)
+    musicData.map(x => SerializationUtils.toJson(x)).repartition(1).saveAsTextFile(musicDataOutputPath)
 
-    fs.delete(new Path(queryPath), true)
-    data.map(x => x.getSong + "\t" + x.getDisplaySong).distinct().repartition(1).saveAsTextFile(queryPath)
+    fs.delete(new Path(queryOutputPath), true)
+    musicData.map(x => x.getSong + "\t" + x.getDisplaySong).distinct().repartition(1).saveAsTextFile(queryOutputPath)
+
+    // Label Data
+    val queries = labelData.map(_._1).distinct()
+    val zippedQueries = queries.zipWithIndex().map(x => x._1 -> (x._2 + 1))
+
+    val queryDataSplits = zippedQueries.randomSplit(Array(0.9, 0.1))
+    val train = spark.sparkContext.broadcast(queryDataSplits(0).collectAsMap())
+    val test = spark.sparkContext.broadcast(queryDataSplits(1).collectAsMap())
+
+    val trainOutputPath = labelOutputPath + "/train"
+    val testOutputPath = labelOutputPath + "/test"
+    fs.delete(new Path(trainOutputPath), true)
+    fs.delete(new Path(testOutputPath), true)
+    labelData.filter(x => train.value.contains(x._1)).map(_.productIterator.mkString("\t")).repartition(1).saveAsTextFile(trainOutputPath)
+    labelData.filter(x => test.value.contains(x._1)).map(_.productIterator.mkString("\t")).repartition(1).saveAsTextFile(testOutputPath)
+
+    fs.delete(new Path(zippedQueryOutputPath), true)
+    spark.sparkContext.makeRDD(zippedQueries.sortBy(_._2).collect().map(_.productIterator.mkString("\t")), 1).repartition(1).saveAsTextFile(zippedQueryOutputPath)
+
     spark.stop()
     println("Job done!")
+  }
+
+  def labelMusicData(musicData: MusicData) = {
+    val song = musicData.getSong
+    val finishCount = musicData.getFinishCount
+    val validListenCount = musicData.getValidListenCount
+    val playCount = musicData.getPlayCount
+    val qqRank = musicData.getQqRank()
+    val resourceId = musicData.getResourceId()
+
+    val finishRatio = 1.0f * finishCount / playCount
+    val validListenRatio = 1.0f * validListenCount / playCount
+
+    var label = 0
+    if (qqRank <= 3) {
+      label = 5
+    } else if (playCount >= 100) {
+      if (finishRatio >= 0.6 || validListenRatio >= 0.6) {
+        label = 5
+      } else if ((finishRatio >= 0.4 && finishRatio < 0.6) && (validListenRatio >= 0.4 && validListenRatio < 0.6)) {
+        label = 4
+      }
+      label = 1
+    } else {
+      if (finishRatio >= 0.6 || validListenRatio >= 0.6) {
+        label = 3
+      } else if ((finishRatio >= 0.4 && finishRatio < 0.6) && (validListenRatio >= 0.4 && validListenRatio < 0.6)) {
+        label = 2
+      }
+      label = 1
+    }
+
+    (song, resourceId, label)
   }
 
   /**
@@ -87,7 +149,7 @@ object MusicLogAnalyser {
     }).collectAsMap())
   }
 
-  def analysis(spark: SparkSession, musicSearchLog: Seq[String], qqRankMap: Broadcast[scala.collection.Map[String, Array[String]]]) = {
+  def analysisLog(spark: SparkSession, musicSearchLog: Seq[String], qqRankMap: Broadcast[scala.collection.Map[String, Array[String]]]) = {
     import spark.implicits._
     spark.read
       .parquet(musicSearchLog: _*)
@@ -129,7 +191,7 @@ object MusicLogAnalyser {
       .map {
         case ((song, resourceId, displaySong), (finishCount, validListenCount, playCount)) => {
           var query = song
-          if(StringUtils.isNotBlank(displaySong)) {
+          if (StringUtils.isNotBlank(displaySong)) {
             query = displaySong
           }
           val musicIds = qqRankMap.value.getOrElse(query, Array())

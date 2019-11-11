@@ -63,7 +63,6 @@ object LabelGenerator {
     val queries = labelData.map(_._1).distinct()
     val queryData = queries.zipWithIndex().map(x => x._1 -> (x._2 + 1))
 
-
     val queryDataSplits = queryData.randomSplit(Array(0.9, 0.1))
     val train = spark.sparkContext.broadcast(queryDataSplits(0).collectAsMap())
     val test = spark.sparkContext.broadcast(queryDataSplits(1).collectAsMap())

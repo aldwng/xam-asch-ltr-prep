@@ -22,6 +22,9 @@ public class MusicData implements Serializable {
 
   private int qqRank = 0;
 
+  public MusicData() {
+  }
+
   public MusicData(String song, String resourceId, int finishCount, int playCount, int validListenCount,
                    String displaySong, int qqRank) {
     this.song = song;
