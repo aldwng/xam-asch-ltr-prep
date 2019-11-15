@@ -1,4 +1,4 @@
-package com.xiaomi.misearch.rank.music.utils
+package com.xiaomi.misearch.rank.music.model
 
 final case class StatsFeature(songArtistSearchCount: Long,
                               songSearchPlayCount: Long,

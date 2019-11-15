@@ -1,4 +1,4 @@
-package com.xiaomi.misearch.rank.music.utils
+package com.xiaomi.misearch.rank.music.model
 
 import com.xiaomi.data.spec.log.tv.{MusicMetaMid, MusicResourceMid}
 import org.apache.commons.collections.CollectionUtils

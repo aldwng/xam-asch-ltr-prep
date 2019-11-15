@@ -63,7 +63,6 @@ object SampleGenerator {
     paths.foreach {
       path =>
         val samples = generate(labelPath + path, appIdToAppMap, queryToQidMap, sc)
-
         val samplePath = sampleOutputPath + path
         fs.delete(new Path(samplePath), true)
         samples.map(s => SerializationUtils.toJson(s)).saveAsTextFile(samplePath)

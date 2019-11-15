@@ -1,5 +1,7 @@
 package com.xiaomi.misearch.rank.music.utils
 
+import com.xiaomi.data.spec.platform.misearch.SoundboxMusicSearchLog
+
 object LogUtils {
 
   private def isMatchField(queries: Array[String], fields: Array[String]): Boolean = {
@@ -23,20 +25,32 @@ object LogUtils {
     isMatchField(query.split(";"), field.split(";"))
   }
 
-  def getIdFromMarkInfo(markInfo: String): String = {
+  private def getIdFromMarkInfo(markInfo: String): String = {
     if (markInfo == null || !markInfo.contains("::")) {
       return null
     }
     val infos = markInfo.split("::")
-    if (infos.nonEmpty) return infos(0)
-    null
+    if (infos.nonEmpty) infos(0) else null
   }
 
-  def combineIdAndCp(id: String, cp: String): String = {
+  private def combineIdAndCp(id: String, cp: String): String = {
     val availableCps = ".*(xiaowei|miui|xiaoai|beiwa)+.*"
     if (cp == null || !cp.matches(availableCps)) {
       return null
     }
     (if (cp == "miui") "mi" else cp) + "_" + id
+  }
+
+  def extractMusicId(x: SoundboxMusicSearchLog) = {
+    val musicId = x.musicid
+    val cp = x.cp
+
+    val idFromLog = combineIdAndCp(musicId, cp)
+    val idFromMark = getIdFromMarkInfo(x.markinfo)
+    if (idFromMark == null && idFromLog == null) {
+      ""
+    } else {
+      if (idFromMark != null) idFromMark else idFromLog
+    }
   }
 }

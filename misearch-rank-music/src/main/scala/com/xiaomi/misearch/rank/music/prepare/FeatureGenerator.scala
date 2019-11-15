@@ -1,16 +1,16 @@
 package com.xiaomi.misearch.rank.music.prepare
 
-import com.google.gson.Gson
 import com.xiaomi.data.commons.spark.HdfsIO._
 import com.xiaomi.data.spec.log.tv.{MaterialMusicMid, TableName}
 import com.xiaomi.data.spec.platform.misearch.SoundboxMusicSearchLog
 import com.xiaomi.misearch.rank.music.common.model.{MusicItem, StoredMusicItem}
-import com.xiaomi.misearch.rank.music.utils.ArtistFeature._
-import com.xiaomi.misearch.rank.music.utils.FeatureUtils._
-import com.xiaomi.misearch.rank.music.utils.IndexFeature._
+import com.xiaomi.misearch.rank.music.model.{ArtistFeature, IndexFeature, StatsFeature}
+import com.xiaomi.misearch.rank.music.model.ArtistFeature._
+import com.xiaomi.misearch.rank.music.model.IndexFeature._
+import com.xiaomi.misearch.rank.music.utils.MusicItemUtils._
 import com.xiaomi.misearch.rank.music.utils.LogUtils._
 import com.xiaomi.misearch.rank.music.utils.Paths._
-import com.xiaomi.misearch.rank.music.utils.{ArtistFeature, IndexFeature, StatsFeature}
+import com.xiaomi.misearch.rank.utils.SerializationUtils
 import org.apache.commons.collections.CollectionUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
@@ -29,12 +29,12 @@ object FeatureGenerator {
     val sparkConf = new SparkConf().setAppName(this.getClass.getName)
     val sparkContext = new SparkContext(sparkConf)
 
-    val dataWithStats = generateDataWithStats(SOUNDBOX_MUSIC_SEARCH_BASE_LOG, 1, 15, sparkContext)
+    val dataWithStats = generateDataWithStats(SOUNDBOX_MUSIC_SEARCH_LOG, 1, 15, sparkContext)
     val dataMap = sparkContext.broadcast(dataWithStats.collectAsMap())
 
     val dataWithFeatures = generateFeatureFromIndex(MATERIAL_MUSIC_INDEX_DATA, dataMap, sparkContext)
 
-    val artistFeatures = generateArtistFeature(SOUNDBOX_MUSIC_SEARCH_BASE_LOG, MATERIAL_MUSIC_INDEX_DATA,
+    val artistFeatures = generateArtistFeature(SOUNDBOX_MUSIC_SEARCH_LOG, MATERIAL_MUSIC_INDEX_DATA,
       ARTIST_EMBEDDING_VECTOR, sparkContext)
     val artistFeatureMap = sparkContext.broadcast(artistFeatures.collectAsMap())
 
@@ -59,7 +59,7 @@ object FeatureGenerator {
 
     val musicItems = rawFeatures
       .map {
-        case(id, (indexFeature, statsFeature, artistFeature)) =>
+        case (id, (indexFeature, statsFeature, artistFeature)) =>
           val coverArtistVector = if (indexFeature.coverArtist != null)
             artistFeatureMap.value.getOrElse(indexFeature.coverArtist, artistFeature).artistVector else
             artistFeature.artistVector
@@ -78,19 +78,16 @@ object FeatureGenerator {
     val storedFeatures = musicItems
       .map {
         case (_, musicItem) =>
-          val gson = new Gson()
-          gson.toJson(new StoredMusicItem(musicItem))
+          SerializationUtils.toJson(new StoredMusicItem(musicItem))
       }
 
     val features = musicItems
       .map {
-        case (_, musicFeature) =>
-          val gson = new Gson()
-          gson.toJson(musicFeature)
+        case (_, musicFeature) => SerializationUtils.toJson(musicFeature)
       }
 
     val hadoopConf = new Configuration(sparkContext.hadoopConfiguration)
-    val fileSystem : FileSystem = FileSystem.get(hadoopConf)
+    val fileSystem: FileSystem = FileSystem.get(hadoopConf)
 
     fileSystem.delete(new Path(SOUNDBOX_MUSIC_TAG_INDEX), true)
     tagIndexRdd.repartition(1).saveAsTextFile(SOUNDBOX_MUSIC_TAG_INDEX)
@@ -116,7 +113,7 @@ object FeatureGenerator {
   }
 
   private def getSongArtistSearchCount(song: String, artistList: Array[String],
-                                        songArtistMap: Broadcast[scala.collection.Map[(String, String), Long]]): Long = {
+                                       songArtistMap: Broadcast[scala.collection.Map[(String, String), Long]]): Long = {
     if (artistList == null || artistList.isEmpty) {
       return 0L
     }
@@ -146,18 +143,13 @@ object FeatureGenerator {
           .filter(log => (isMatchField(log.song, log.songname) || isMatchField(log.song, log.songalias)) &&
             isMatchField(log.artist, log.artistname))
           .map {
-            log => {
-              val idFromLog = combineIdAndCp(log.musicid, log.cp)
-              val idFromMark = getIdFromMarkInfo(log.markinfo)
-              if (idFromMark != null || idFromLog != null) {
-                (if (idFromMark != null) idFromMark else idFromLog, log.artist == null,
-                  log.requestid) -> (if ("autoswitch" == log.switchtype) 1 else 0)
-              } else {
-                null
-              }
-            }
+            log => extractMusicId(log) -> log
           }
-          .filter(_ != null)
+          .filter(_._1.nonEmpty)
+          .map {
+            case (musicId, log) =>
+              (musicId, log.artist == null, log.requestid) -> (if ("autoswitch" == log.switchtype) 1 else 0)
+          }
           .reduceByKey(_ + _)
           .map {
             case ((id, isOnlySong, _), finishCount) =>

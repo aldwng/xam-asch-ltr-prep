@@ -1,18 +1,21 @@
 package com.xiaomi.misearch.rank.music.prepare
 
 import com.twitter.scalding.Args
-import com.xiaomi.misearch.rank.music.model.{MusicData, MusicSearchLog}
+import com.xiaomi.data.commons.spark.HdfsIO._
+import com.xiaomi.data.spec.platform.misearch.SoundboxMusicSearchLog
+import com.xiaomi.misearch.rank.music.model.MusicStat
+import com.xiaomi.misearch.rank.music.utils.LogUtils._
 import com.xiaomi.misearch.rank.music.utils.Paths
 import com.xiaomi.misearch.rank.utils.PathUtils._
 import com.xiaomi.misearch.rank.utils.SerializationUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.spark.SparkConf
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.{SparkConf, SparkContext}
 
-import scala.util.control._
+import scala.util.control.Breaks
 
 /**
   * @author Shenglan Wang
@@ -25,24 +28,23 @@ object LabelGenerator {
     val end = semanticDate(args.getOrElse("end", "-1"))
     val dev = args.getOrElse("dev", "false").toBoolean
 
-    var musicSearchLog = intermediateDateIntervalPath(Paths.MUSIC_SEARCH_LOG, start, end)
+    var musicSearchLog = intermediateDateIntervalPath(Paths.SOUNDBOX_MUSIC_SEARCH_LOG, start, end)
     var qqRankPath = Paths.QQ_RANK_PATH
 
-    var musicDataOutputPath = intermediateDatePath(Paths.MUSIC_DATA_PATH, end.toInt)
+    var musicStatOutputPath = intermediateDatePath(Paths.MUSIC_STAT_PATH, end.toInt)
     var labelOutputPath = intermediateDatePath(Paths.LABEL_PATH, end.toInt)
-    var queryOutputPath = intermediateDatePath(Paths.QUERY_PATH, end.toInt)
-    var zippedQueryOutputPath = intermediateDatePath(Paths.ZIPPED_QUERY_PATH, end.toInt)
+    var queryOutputPath = Paths.QUERY_PATH
+
     var conf = new SparkConf()
       .setAppName(LabelGenerator.getClass.getName)
 
     if (dev) {
-      musicSearchLog = Seq(Paths.MUSIC_SEARCH_LOG_LOCAL)
+      musicSearchLog = Seq(Paths.SOUNDBOX_MUSIC_SEARCH_LOG_LOCAL)
       qqRankPath = Paths.QQ_RANK_PATH_LOCAL
 
-      musicDataOutputPath = Paths.MUSIC_DATA_PATH_LOCAL
+      musicStatOutputPath = Paths.MUSIC_STAT_PATH_LOCAL
       labelOutputPath = Paths.LABEL_PATH_LOCAL
       queryOutputPath = Paths.QUERY_PATH_LOCAL
-      zippedQueryOutputPath = Paths.ZIPPED_QUERY_PATH_LOCAL
       conf = conf.setMaster("local[*]")
     }
 
@@ -50,45 +52,32 @@ object LabelGenerator {
       .builder()
       .config(conf)
       .getOrCreate()
+    val sc = spark.sparkContext
 
     val qqRankMap = getQQRankMap(qqRankPath, spark)
-    val musicData = analysisLog(spark, musicSearchLog, qqRankMap)
-    println("Music Data count: " + musicData.count())
+    val musicStats = analysisLog(sc, musicSearchLog, qqRankMap)
+    println("Music Stats line: " + musicStats.count())
 
-    val labelData = musicData.map(x => labelMusicData(x)).filter(_._3 > 0)
+    val labelData = musicStats.map(x => label(x)).filter(_._3 > 0)
     println("Label Data count: " + labelData.count())
 
-    // Music Data
+    // Music Stats
     val fs = FileSystem.get(new Configuration())
-    fs.delete(new Path(musicDataOutputPath), true)
-    musicData.map(x => SerializationUtils.toJson(x)).repartition(1).saveAsTextFile(musicDataOutputPath)
+    fs.delete(new Path(musicStatOutputPath), true)
+    musicStats.map(x => SerializationUtils.toJson(x)).repartition(1).saveAsTextFile(musicStatOutputPath)
 
     fs.delete(new Path(queryOutputPath), true)
-    musicData.map(x => x.getSong + "\t" + x.getDisplaySong).distinct().repartition(1).saveAsTextFile(queryOutputPath)
+    musicStats.map(x => x.getSong + "\t" + (if(StringUtils.isEmpty(x.getDisplaySong)) "" else x.getDisplaySong)).distinct().repartition(1).saveAsTextFile(queryOutputPath)
 
     // Label Data
-    val queries = labelData.map(_._1).distinct()
-    val zippedQueries = queries.zipWithIndex().map(x => x._1 -> (x._2 + 1))
-
-    val queryDataSplits = zippedQueries.randomSplit(Array(0.9, 0.1))
-    val train = spark.sparkContext.broadcast(queryDataSplits(0).collectAsMap())
-    val test = spark.sparkContext.broadcast(queryDataSplits(1).collectAsMap())
-
-    val trainOutputPath = labelOutputPath + "/train"
-    val testOutputPath = labelOutputPath + "/test"
-    fs.delete(new Path(trainOutputPath), true)
-    fs.delete(new Path(testOutputPath), true)
-    labelData.filter(x => train.value.contains(x._1)).map(_.productIterator.mkString("\t")).repartition(1).saveAsTextFile(trainOutputPath)
-    labelData.filter(x => test.value.contains(x._1)).map(_.productIterator.mkString("\t")).repartition(1).saveAsTextFile(testOutputPath)
-
-    fs.delete(new Path(zippedQueryOutputPath), true)
-    spark.sparkContext.makeRDD(zippedQueries.sortBy(_._2).collect().map(_.productIterator.mkString("\t")), 1).repartition(1).saveAsTextFile(zippedQueryOutputPath)
+    fs.delete(new Path(labelOutputPath), true)
+    labelData.map(_.productIterator.mkString("\t")).repartition(1).saveAsTextFile(labelOutputPath)
 
     spark.stop()
     println("Job done!")
   }
 
-  def labelMusicData(musicData: MusicData) = {
+  def label(musicData: MusicStat) = {
     val song = musicData.getSong
     val finishCount = musicData.getFinishCount
     val validListenCount = musicData.getValidListenCount
@@ -103,19 +92,21 @@ object LabelGenerator {
     if (qqRank <= 3) {
       label = 5
     } else if (playCount >= 100) {
-      if (finishRatio >= 0.6 || validListenRatio >= 0.6) {
+      if (finishRatio >= 0.6 || validListenRatio >= 0.8) {
         label = 5
-      } else if ((finishRatio >= 0.4 && finishRatio < 0.6) && (validListenRatio >= 0.4 && validListenRatio < 0.6)) {
+      } else if ((finishRatio >= 0.4 && finishRatio < 0.6) && (validListenRatio >= 0.6 && validListenRatio < 0.8)) {
         label = 4
+      } else {
+        label = 1
       }
-      label = 1
     } else {
-      if (finishRatio >= 0.6 || validListenRatio >= 0.6) {
+      if (finishRatio >= 0.6 || validListenRatio >= 0.8) {
         label = 3
-      } else if ((finishRatio >= 0.4 && finishRatio < 0.6) && (validListenRatio >= 0.4 && validListenRatio < 0.6)) {
+      } else if ((finishRatio >= 0.4 && finishRatio < 0.6) && (validListenRatio >= 0.6 && validListenRatio < 0.8)) {
         label = 2
+      } else {
+        label = 1
       }
-      label = 1
     }
 
     (song, resourceId, label)
@@ -131,12 +122,14 @@ object LabelGenerator {
     var cp = ""
     var musicId = ""
 
-    val splits = markInfo.split("::")
-    if (splits.length > 0) {
-      val items = splits(0).split("_")
-      if (items.length == 2) {
-        cp = items(0)
-        musicId = items(1)
+    if (StringUtils.isNotBlank(markInfo)) {
+      val splits = markInfo.split("::")
+      if (splits.length > 0) {
+        val items = splits(0).split("_")
+        if (items.length == 2) {
+          cp = items(0)
+          musicId = items(1)
+        }
       }
     }
     (cp, musicId)
@@ -149,45 +142,38 @@ object LabelGenerator {
     }).collectAsMap())
   }
 
-  def analysisLog(spark: SparkSession, musicSearchLog: Seq[String], qqRankMap: Broadcast[scala.collection.Map[String, Array[String]]]) = {
-    import spark.implicits._
-    spark.read
-      .parquet(musicSearchLog: _*)
-      .as[MusicSearchLog]
-      .rdd
-      .map { x =>
-        val song = x.song.getOrElse("")
-        var musicId = x.musicid.getOrElse("")
-        val displaySong = x.displaysong.getOrElse("")
-        var cp = x.cp.getOrElse("")
+  def analysisLog(sc: SparkContext, musicSearchLog: Seq[String], qqRankMap: Broadcast[scala.collection.Map[String, Array[String]]]) = {
+    val invalidRankIdx = 1000
+    sc.union(musicSearchLog.map { p =>
+      sc.thriftParquetFile(p, classOf[SoundboxMusicSearchLog])
+        .filter(_.song != null)
+        .filter(_.musicid != null)
+        .filter(_.cp != null)
+        .map(log => extractMusicId(log) -> log)
+        .filter(_._1.nonEmpty)
+        .map {
+          case (resourceId, line) =>
+            var isFinished = 0
+            val switchType = line.switchtype
+            if (StringUtils.isNotBlank(switchType) && switchType.equals("autoswitch")) {
+              isFinished = 1
+            }
+            val startTime = line.starttime
+            val endTime = line.endtime
+            val listenTime: Long = endTime - startTime
+            var isValidListened = 0
+            if (listenTime >= 30) {
+              isValidListened = 1
+            }
 
-        if (musicId.startsWith("mv")) {
-          val values: (String, String) = parseMarkInfo(x.markinfo.getOrElse(""))
-          cp = values._1
-          musicId = values._2
+            (line.song, resourceId, isFinished, isValidListened, line.displaysong)
         }
-
-        var isFinished = 0
-        val switchType = x.switchType.getOrElse("")
-        if (StringUtils.isNotBlank(switchType) && switchType.equals("autoswitch")) {
-          isFinished = 1
-        }
-        val startTime = x.starttime.getOrElse(0L)
-        val endTime = x.endTime.getOrElse(0L)
-        val listenTime: Long = endTime - startTime
-        var isValidListened = 0
-        if (listenTime >= 30) {
-          isValidListened = 1
-        }
-
-        (song, cp, musicId, isFinished, isValidListened, displaySong)
-      }
+    })
       .filter(x => StringUtils.isNotBlank(x._1))
       .filter(x => StringUtils.isNotBlank(x._2))
-      .filter(x => StringUtils.isNotBlank(x._3))
-      .map { case (song, cp, musicId, isFinished, isValidListened, displaySong) => (song, cp + "_" + musicId, displaySong) -> (isFinished, isValidListened, 1) }
+      .map { case (song, resourceId, isFinished, isValidListened, displaySong) => (song, resourceId, displaySong) -> (isFinished, isValidListened, 1) }
       .reduceByKey((x, y) => (x._1 + y._1, x._2 + y._2, x._3 + y._3))
-      .filter(_._2._3 >= 10)
+      .filter(_._2._3 >= 50)
       .map {
         case ((song, resourceId, displaySong), (finishCount, validListenCount, playCount)) => {
           var query = song
@@ -207,7 +193,11 @@ object LabelGenerator {
               }
             }
           }
-          new MusicData(song, resourceId, finishCount, playCount, validListenCount, displaySong, rank)
+
+          if (rank == 0) {
+            rank = invalidRankIdx
+          }
+          new MusicStat(song, resourceId, finishCount, playCount, validListenCount, displaySong, rank)
         }
       }
   }

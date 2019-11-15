@@ -4,7 +4,7 @@ import java.io.Serializable;
 /**
  * @author Shenglan Wang
  */
-public class MusicData implements Serializable {
+public class MusicStat implements Serializable {
 
   // normalized song name, song == query
   private String song;
@@ -22,10 +22,10 @@ public class MusicData implements Serializable {
 
   private int qqRank = 0;
 
-  public MusicData() {
+  public MusicStat() {
   }
 
-  public MusicData(String song, String resourceId, int finishCount, int playCount, int validListenCount,
+  public MusicStat(String song, String resourceId, int finishCount, int playCount, int validListenCount,
                    String displaySong, int qqRank) {
     this.song = song;
     this.resourceId = resourceId;
