@@ -11,6 +11,7 @@
     <modules>
         <module>misearch-rank-appstore</module>
         <module>misearch-rank-appstore-common</module>
+        <module>misearch-rank-music-common</module>
         <module>misearch-rank-music</module>
         <module>misearch-rank-utils</module>
     </modules>

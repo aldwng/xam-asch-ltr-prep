@@ -39,6 +39,12 @@
         <dependency>
             <groupId>com.xiaomi.data</groupId>
             <artifactId>commons-spark_${scala.version.major}</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.alibaba</groupId>
+                    <artifactId>fastjson</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -115,6 +121,32 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
+
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.xiaomi.data</groupId>
+            <artifactId>data-platform-spec-misearch</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.xiaomi.data</groupId>
+            <artifactId>data-platform-spec-aiservice</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.xiaomi.misearch</groupId>
+            <artifactId>misearch-rank-music-common</artifactId>
+            <version>0.0.4-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
 
     <build>

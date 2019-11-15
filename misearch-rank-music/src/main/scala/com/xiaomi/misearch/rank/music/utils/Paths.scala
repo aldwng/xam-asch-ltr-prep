@@ -28,4 +28,18 @@ object Paths {
 
   val ZIPPED_QUERY_PATH = BASE_DIR + "/zip_query"
   val ZIPPED_QUERY_PATH_LOCAL = BASE_DIR_LOCAL + "/zip_query"
+
+  val SOUNDBOX_MUSIC_SEARCH_BASE_LOG = "/user/h_data_platform/platform/misearch/soundbox_music_search_log"
+
+  val MATERIAL_MUSIC_INDEX_DATA = "/user/h_data_platform/platform/aiservice/ai_service_music_idx"
+
+  val SOUNDBOX_SONG_ARTIST_PAIR = "/user/h_misearch/ai/music/table/soundbox_search/feedback_song_artist_pair"
+
+  val ARTIST_EMBEDDING_VECTOR = "/user/h_sns/soundbox_recommend/mid_data/scenes_similar/user_artist_v1.vec"
+
+  val SOUNDBOX_MUSIC_FEATURE: String = BASE_DIR + "/music_feature"
+
+  val SOUNDBOX_MUSIC_STORED_FEATURE: String = BASE_DIR + "/music_stored_feature"
+
+  val SOUNDBOX_MUSIC_TAG_INDEX: String = BASE_DIR + "/music_tag_index"
 }
