@@ -40,6 +40,8 @@ object Paths {
 
   val SOUNDBOX_MUSIC_STORED_FEATURE = BASE_DIR + "/music_stored_feature"
 
+  val SOUNDBOX_ARTIST_STORED_FEATURE = BASE_DIR + "/artist_stored_feature"
+
   val SOUNDBOX_MUSIC_TAG_INDEX = BASE_DIR + "/music_tag_index"
   val SOUNDBOX_MUSIC_TAG_INDEX_LOCAL = BASE_DIR_LOCAL + "/music_tag_index"
 }

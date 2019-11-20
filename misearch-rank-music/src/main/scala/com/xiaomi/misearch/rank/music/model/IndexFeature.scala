@@ -1,6 +1,6 @@
 package com.xiaomi.misearch.rank.music.model
 
-import com.xiaomi.data.spec.log.tv.{MusicMetaMid, MusicResourceMid}
+import com.xiaomi.data.spec.log.tv.{MusicMetaMid, MusicResourceMid, MusicTagType}
 import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang.StringUtils
 
@@ -33,7 +33,8 @@ object IndexFeature {
       artistIds = metaMid.getArtistIds.asScala.toArray.map(_.toLong)
     }
     if (CollectionUtils.isNotEmpty(resMid.getTags)) {
-      tags = resMid.getTags.asScala.toArray.filter(!_.name.contains("台湾民歌运动")).map(_.name)
+      tags = resMid.getTags.asScala.toArray.filter(_.`type` == MusicTagType.STYLE)
+        .filter(!_.name.contains("台湾民歌运动")).map(_.name)
     }
     IndexFeature(metaMid.getMusicId, metaMid.getName, artists, artistIds, tags,
       metaMid.getRank, resMid.getRank, resMid.getQuality, resMid.getQqSongRawRank, resMid.getQqMultiArtistRawRank,

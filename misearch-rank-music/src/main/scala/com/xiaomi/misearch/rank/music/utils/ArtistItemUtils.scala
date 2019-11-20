@@ -1,21 +1,15 @@
-package com.xiaomi.misearch.rank.music.model
+package com.xiaomi.misearch.rank.music.utils
 
 import com.xiaomi.data.spec.log.tv.MusicMetaMid
+import com.xiaomi.misearch.rank.music.common.model.ArtistItem
 import org.apache.commons.collections.CollectionUtils
-
 import scala.collection.JavaConverters._
+
 import scala.collection.mutable.ListBuffer
 
-final case class ArtistFeature(artistId: Long,
-                               artistName: String,
-                               artistMusicCount: Long,
-                               artistOriginCount: Long,
-                               artistSearchCount: Long,
-                               artistVector: Array[Double])
+object ArtistItemUtils {
 
-object ArtistFeature {
-
-  def generateArtistFeatureFromMulti(artistFeatures: ListBuffer[ArtistFeature]): ArtistFeature = {
+  def generateArtistFeatureFromMulti(artistFeatures: ListBuffer[ArtistItem]): ArtistItem = {
     if (artistFeatures.isEmpty) {
       return null
     }
@@ -23,24 +17,18 @@ object ArtistFeature {
       return artistFeatures.head
     }
     val length = artistFeatures.length
-    var artistId = 0L
     val artistNames = ListBuffer[String]()
     var artistMusicCount = 0L
     var artistOriginCount = 0L
     var artistSearchCount = 0L
-    var artistVector = Array.fill(32)(0D)
     artistFeatures.foreach(af => {
-      artistId += af.artistId
-      artistNames.append(af.artistName)
-      artistMusicCount += af.artistMusicCount
-      artistOriginCount += af.artistOriginCount
-      artistSearchCount += af.artistSearchCount
-      if (af.artistVector != null) {
-        artistVector = (artistVector, af.artistVector).zipped.map(_ + _)
-      }
+      artistNames.append(af.getName)
+      artistMusicCount += af.getMusicCount
+      artistOriginCount += af.getOriginCount
+      artistSearchCount += af.getSearchCount
     })
-    ArtistFeature(artistId / length, artistNames.mkString(";"), artistMusicCount / length, artistOriginCount / length,
-      artistSearchCount / length, artistVector.map(_ / length))
+    new ArtistItem(artistNames.mkString(";"), artistSearchCount / length, artistMusicCount / length,
+      artistOriginCount / length)
   }
 
   def countArtistInfoFromIndex(metaMid: MusicMetaMid): ListBuffer[(Long, (Long, Long))] = {

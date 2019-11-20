@@ -1,14 +1,14 @@
 package com.xiaomi.misearch.rank.music.utils
 
-import com.xiaomi.misearch.rank.music.common.model.MusicItem
-import com.xiaomi.misearch.rank.music.model.{ArtistFeature, IndexFeature, StatsFeature}
+import com.xiaomi.misearch.rank.music.common.model.{ArtistItem, MusicItem}
+import com.xiaomi.misearch.rank.music.model.{IndexFeature, StatsFeature}
 
 import scala.collection.JavaConverters._
 
 object MusicItemUtils {
 
-  def convertToMusicItem(id: String, indexFeature: IndexFeature, statsFeature: StatsFeature, artistFeature: ArtistFeature,
-                           coverArtistVector: Array[Double]): MusicItem = {
+  def convertToMusicItem(id: String, indexFeature: IndexFeature, statsFeature: StatsFeature,
+                         artistItem: ArtistItem): MusicItem = {
     val musicItem = new MusicItem
     musicItem.setId(id)
     musicItem.setMetaRank(indexFeature.metaRank)
@@ -25,17 +25,11 @@ object MusicItemUtils {
     musicItem.setSongArtistSearchFinishRate(if (statsFeature.songArtistSearchPlayCount > 0)
         statsFeature.songArtistSearchFinishCount.toDouble / statsFeature.songArtistSearchPlayCount else 0D)
     musicItem.setSongArtistSearchCount(statsFeature.songArtistSearchCount)
-    musicItem.setArtistSearchCount(artistFeature.artistSearchCount)
-    musicItem.setArtistMusicCount(artistFeature.artistMusicCount)
-    musicItem.setArtistOriginCount(artistFeature.artistOriginCount)
-    if (artistFeature.artistVector != null) {
-      musicItem.setArtistVector(artistFeature.artistVector.toList.map(_.asInstanceOf[java.lang.Double]).asJava)
-    }
-    if (coverArtistVector != null) {
-      musicItem.setCoverArtistVector(coverArtistVector.toList.map(_.asInstanceOf[java.lang.Double]).asJava)
-    }
+    musicItem.setArtistSearchCount(artistItem.getSearchCount)
+    musicItem.setArtistMusicCount(artistItem.getMusicCount)
+    musicItem.setArtistOriginCount(artistItem.getOriginCount)
     if (indexFeature.tags != null) {
-      musicItem.setTags(indexFeature.tags.toList.asJava)
+      musicItem.setStyleTags(indexFeature.tags.toList.asJava)
     }
     musicItem
   }

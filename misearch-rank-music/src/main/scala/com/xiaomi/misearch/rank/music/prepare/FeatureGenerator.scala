@@ -3,19 +3,17 @@ package com.xiaomi.misearch.rank.music.prepare
 import com.xiaomi.data.commons.spark.HdfsIO._
 import com.xiaomi.data.spec.log.tv.{MaterialMusicMid, TableName}
 import com.xiaomi.data.spec.platform.misearch.SoundboxMusicSearchLog
-import com.xiaomi.misearch.rank.music.common.model.{MusicItem, StoredMusicItem}
-import com.xiaomi.misearch.rank.music.model.{ArtistFeature, IndexFeature, StatsFeature}
-import com.xiaomi.misearch.rank.music.model.ArtistFeature._
+import com.xiaomi.misearch.rank.music.common.model.{ArtistItem, StoredMusicItem}
+import com.xiaomi.misearch.rank.music.utils.ArtistItemUtils._
 import com.xiaomi.misearch.rank.music.model.IndexFeature._
-import com.xiaomi.misearch.rank.music.utils.MusicItemUtils._
+import com.xiaomi.misearch.rank.music.model.{IndexFeature, StatsFeature}
 import com.xiaomi.misearch.rank.music.utils.LogUtils._
+import com.xiaomi.misearch.rank.music.utils.MusicItemUtils._
 import com.xiaomi.misearch.rank.music.utils.Paths._
 import com.xiaomi.misearch.rank.utils.SerializationUtils
-import org.apache.commons.collections.CollectionUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 import org.joda.time.DateTime
 
@@ -34,19 +32,18 @@ object FeatureGenerator {
 
     val dataWithFeatures = generateFeatureFromIndex(MATERIAL_MUSIC_INDEX_DATA, dataMap, sparkContext)
 
-    val artistFeatures = generateArtistFeature(SOUNDBOX_MUSIC_SEARCH_LOG, MATERIAL_MUSIC_INDEX_DATA,
-      ARTIST_EMBEDDING_VECTOR, sparkContext)
-    val artistFeatureMap = sparkContext.broadcast(artistFeatures.collectAsMap())
+    val artistItems = generateArtistItem(SOUNDBOX_MUSIC_SEARCH_LOG, MATERIAL_MUSIC_INDEX_DATA, sparkContext)
+    val artistItemMap = sparkContext.broadcast(artistItems.collectAsMap())
 
     val songArtistStatsMap = sparkContext.broadcast(readSongArtistStats(SOUNDBOX_SONG_ARTIST_PAIR, sparkContext))
 
     val rawFeatures = dataWithFeatures
       .map {
         case (id, (indexFeature, (pcount1, fcount1, pcount2, fcount2))) =>
-          val artistFeatureList = ListBuffer[ArtistFeature]()
+          val artistFeatureList = ListBuffer[ArtistItem]()
           if (indexFeature.artists != null) {
             indexFeature.artists.foreach(artist => {
-              artistFeatureList.append(artistFeatureMap.value.getOrElse(artist, null))
+              artistFeatureList.append(artistItemMap.value.getOrElse(artist, null))
             })
           }
           val statsFeature = StatsFeature(getSongArtistSearchCount(indexFeature.song, indexFeature.artists, songArtistStatsMap),
@@ -59,20 +56,15 @@ object FeatureGenerator {
 
     val musicItems = rawFeatures
       .map {
-        case (id, (indexFeature, statsFeature, artistFeature)) =>
-          val coverArtistVector = if (indexFeature.coverArtist != null)
-            artistFeatureMap.value.getOrElse(indexFeature.coverArtist, artistFeature).artistVector else
-            artistFeature.artistVector
-          val item = convertToMusicItem(id, indexFeature, statsFeature, artistFeature, coverArtistVector)
+        case (id, (indexFeature, statsFeature, artistItem)) =>
+          val item = convertToMusicItem(id, indexFeature, statsFeature, artistItem)
           id -> item
       }
 
-    val tagIndexMap = getTagIndexMap(musicItems)
-
-    val tagIndexRdd = sparkContext.parallelize(tagIndexMap.toSeq).sortBy(_._2, ascending = true, 1)
+    val storedArtistFeatures = artistItems.filter(_._2.getMusicCount > 0)
       .map {
-        case (tag, index) =>
-          tag + "\t" + index
+        case (_, artistFeature) =>
+          SerializationUtils.toJson(artistFeature)
       }
 
     val storedFeatures = musicItems
@@ -89,8 +81,8 @@ object FeatureGenerator {
     val hadoopConf = new Configuration(sparkContext.hadoopConfiguration)
     val fileSystem: FileSystem = FileSystem.get(hadoopConf)
 
-    fileSystem.delete(new Path(SOUNDBOX_MUSIC_TAG_INDEX), true)
-    tagIndexRdd.repartition(1).saveAsTextFile(SOUNDBOX_MUSIC_TAG_INDEX)
+    fileSystem.delete(new Path(SOUNDBOX_ARTIST_STORED_FEATURE), true)
+    storedArtistFeatures.repartition(1).saveAsTextFile(SOUNDBOX_ARTIST_STORED_FEATURE)
 
     fileSystem.delete(new Path(SOUNDBOX_MUSIC_STORED_FEATURE), true)
     storedFeatures.repartition(1).saveAsTextFile(SOUNDBOX_MUSIC_STORED_FEATURE)
@@ -191,22 +183,7 @@ object FeatureGenerator {
       }
   }
 
-  private def readArtistVector(vectorPath: String, sc: SparkContext) = {
-    sc.textFile(vectorPath)
-      .map {
-        line => {
-          val digits = line.trim.split(" ")
-          if (digits.length > 30 && !digits(0).contains("s")) {
-            digits(0).toLong -> digits.slice(1, digits.length).map(_.toDouble)
-          } else {
-            null
-          }
-        }
-      }
-      .filter(_ != null)
-  }
-
-  private def generateArtistFeature(logPath: String, idxPath: String, vectorPath: String, sc: SparkContext) = {
+  private def generateArtistItem(logPath: String, idxPath: String, sc: SparkContext) = {
     val dateTime = new DateTime()
     val searchCountRdd = sc.union(Range(2, 16).map {
       day => {
@@ -254,38 +231,11 @@ object FeatureGenerator {
           name -> (id, count.getOrElse(0L, 0L)._1, count.getOrElse(0L, 0L)._2)
       }
 
-    val artistVectors = readArtistVector(vectorPath, sc)
-    val artistVectorMap = sc.broadcast(artistVectors.collectAsMap())
-
     val artistFeatureRdd = (artistRdd leftOuterJoin searchCountRdd)
       .map {
-        case (artistName, ((id, musicCount, originCount), searchCount)) =>
-          artistName -> ArtistFeature(id, artistName, musicCount, originCount, searchCount.getOrElse(0L),
-            artistVectorMap.value.getOrElse(id, null))
+        case (artistName, ((_, musicCount, originCount), searchCount)) =>
+          artistName -> new ArtistItem(artistName, searchCount.getOrElse(0L), musicCount, originCount)
       }
     artistFeatureRdd
   }
-
-  private def getTagIndexMap(features: RDD[(String, MusicItem)]) = {
-    features
-      .flatMap {
-        case (_, musicItem) =>
-          val tagList = ListBuffer[(String, Int)]()
-          if (CollectionUtils.isNotEmpty(musicItem.getTags)) {
-            val tags = musicItem.getTags.asScala
-            tags.foreach(t => tagList.append(t -> 1))
-          }
-          tagList
-      }
-      .filter(_ != null)
-      .reduceByKey(_ + _)
-      .map(_._1)
-      .collect().zipWithIndex
-      .map {
-        case (tag, index) =>
-          tag -> index
-      }
-      .toMap
-  }
-
 }

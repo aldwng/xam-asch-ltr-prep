@@ -20,10 +20,6 @@ import com.xiaomi.misearch.rank.music.common.model.RankSample;
 
 public class MusicFeatureUtils {
 
-  private static int ARTIST_VECTOR_LENGTH = 32;
-
-  private static String ARTIST_VECTOR_ = "artist_vector_";
-  private static String COVER_ARTIST_VECTOR_ = "cover_artist_vector_";
   private static String TAGS_ONE_HOT_ = "tag_";
 
   public static List<Feature> extractFeatures(MusicItem musicItem, Map<String, String> tagIndexMap) {
@@ -48,34 +44,10 @@ public class MusicFeatureUtils {
         .add(new Feature(FeatureName.ARTIST_SEARCH_COUNT.getName(), featureIdx++, musicItem.getArtistSearchCount()));
     features.add(new Feature(FeatureName.ARTIST_MUSIC_COUNT.getName(), featureIdx++, musicItem.getArtistMusicCount()));
     features
-        .add(new Feature(FeatureName.ARTIST_ORIGIN_COUNT.getName(), featureIdx++, musicItem.getArtistOriginCount()));
+        .add(new Feature(FeatureName.ARTIST_ORIGIN_COUNT.getName(), featureIdx, musicItem.getArtistOriginCount()));
 
-    features.addAll(generateVectorFeatures(features.size() + 1, musicItem.getArtistVector(), ARTIST_VECTOR_LENGTH,
-                                           ARTIST_VECTOR_));
-    features.addAll(generateVectorFeatures(features.size() + 1, musicItem.getCoverArtistVector(), ARTIST_VECTOR_LENGTH,
-                                           COVER_ARTIST_VECTOR_));
-
-    features.addAll(generateOneHotFeatures(features.size() + 1, musicItem.getTags(), tagIndexMap, TAGS_ONE_HOT_));
+    features.addAll(generateOneHotFeatures(features.size() + 1, musicItem.getStyleTags(), tagIndexMap, TAGS_ONE_HOT_));
     return features;
-  }
-
-  private static List<Feature> generateVectorFeatures(int featureIdx, List<Double> vector, int dimension, String name) {
-    List<Feature> vectorFeatures = new ArrayList<>();
-    if (dimension < 1) {
-      return vectorFeatures;
-    }
-    if (CollectionUtils.isNotEmpty(vector) && vector.size() == dimension) {
-      for (int i = 0; i < dimension; i++) {
-        vectorFeatures.add(new Feature(name + featureIdx, featureIdx, vector.get(i)));
-        featureIdx++;
-      }
-    } else {
-      for (int i = 0; i < dimension; i++) {
-        vectorFeatures.add(new Feature(name + featureIdx, featureIdx, 0D));
-        featureIdx++;
-      }
-    }
-    return vectorFeatures;
   }
 
   private static List<Feature> generateOneHotFeatures(int featureIdx, List<String> elemList,
@@ -107,7 +79,7 @@ public class MusicFeatureUtils {
     List<Feature> features = rankSample.getFeatures();
 
     List<String> featureTextList = features.stream().sorted(
-        Comparator.comparingInt(o -> o.getId())).map(f -> {
+        Comparator.comparingInt(Feature::getId)).map(f -> {
       int fid = f.getId();
       double value = f.getValue();
       return String.format("%d:%.4f", fid, value);

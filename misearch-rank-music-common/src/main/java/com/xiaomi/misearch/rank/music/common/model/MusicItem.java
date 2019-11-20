@@ -23,17 +23,14 @@ public class MusicItem implements Serializable {
   private double artistMusicCount;
   private double artistOriginCount;
 
-  private List<Double> artistVector;
-  private List<Double> coverArtistVector;
-  private List<String> tags;
+  private List<String> styleTags;
 
   public MusicItem() { }
 
   public MusicItem(String id, double metaRank, double resRank, double quality, double qqSongRawRank, double qqArtistRawRank,
                    double qqRank, double hasLyric, double songSearchPlayCount, double songArtistSearchPlayCount,
                    double songArtistSearchFinishRate, double songArtistSearchCount, double artistSearchCount,
-                   double artistMusicCount, double artistOriginCount, List<Double> artistVector,
-                   List<Double> coverArtistVector, List<String> tags) {
+                   double artistMusicCount, double artistOriginCount, List<String> styleTags) {
     this.id = id;
     this.metaRank = metaRank;
     this.resRank = resRank;
@@ -49,9 +46,7 @@ public class MusicItem implements Serializable {
     this.artistSearchCount = artistSearchCount;
     this.artistMusicCount = artistMusicCount;
     this.artistOriginCount = artistOriginCount;
-    this.artistVector = artistVector;
-    this.coverArtistVector = coverArtistVector;
-    this.tags = tags;
+    this.styleTags = styleTags;
   }
 
   public void setBatchField(StoredMusicItem storedMusicItem) {
@@ -184,27 +179,11 @@ public class MusicItem implements Serializable {
     this.artistOriginCount = artistOriginCount;
   }
 
-  public List<Double> getArtistVector() {
-    return artistVector;
+  public List<String> getStyleTags() {
+    return styleTags;
   }
 
-  public void setArtistVector(List<Double> artistVector) {
-    this.artistVector = artistVector;
-  }
-
-  public List<Double> getCoverArtistVector() {
-    return coverArtistVector;
-  }
-
-  public void setCoverArtistVector(List<Double> coverArtistVector) {
-    this.coverArtistVector = coverArtistVector;
-  }
-
-  public List<String> getTags() {
-    return tags;
-  }
-
-  public void setTags(List<String> tags) {
-    this.tags = tags;
+  public void setStyleTags(List<String> styleTags) {
+    this.styleTags = styleTags;
   }
 }
