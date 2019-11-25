@@ -75,7 +75,7 @@ public class MusicFeatureUtils {
   public static String convertToText(RankSample rankSample) {
     String musicId = rankSample.getMusic().getId();
     int label = rankSample.getLabel();
-    String qid = rankSample.getQid();
+    int qid = rankSample.getQid();
     List<Feature> features = rankSample.getFeatures();
 
     List<String> featureTextList = features.stream().sorted(
@@ -85,6 +85,6 @@ public class MusicFeatureUtils {
       return String.format("%d:%.4f", fid, value);
     }).collect(Collectors.toList());
     String featureText = StringUtils.join(featureTextList, " ");
-    return String.format("%d qid:%s %s # %s", label, qid, featureText, musicId);
+    return String.format("%d qid:%d %s # %s", label, qid, featureText, musicId);
   }
 }

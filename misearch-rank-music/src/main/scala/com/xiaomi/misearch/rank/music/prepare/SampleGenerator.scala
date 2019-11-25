@@ -52,7 +52,7 @@ object SampleGenerator {
     val musicItemMap = sc.broadcast(getMusicItems(musicFeaturePath, musicIdMap, sc).collectAsMap())
 
     // Query
-    val queries = label.map(_._1).distinct().zipWithIndex().map(x => x._1 -> (x._2 + 1))
+    val queries = label.map(_._1).distinct().zipWithIndex().map(x => x._1 -> (x._2 + 1).toInt)
     val queryMap = sc.broadcast(queries.collectAsMap())
 
     // Sample
@@ -64,7 +64,7 @@ object SampleGenerator {
         case (song, musicItemOpt, label, qidOpt) =>
           val musicItem = musicItemOpt.get
           val features = MusicFeatureUtils.extractFeatures(musicItem, tagMap.asJava)
-          new RankSample(musicItem, song, qidOpt.get.toString, label, features)
+          new RankSample(musicItem, song, qidOpt.get, label, features)
       }
 
     val fs = FileSystem.get(new Configuration())
@@ -76,8 +76,8 @@ object SampleGenerator {
     val testOutputPath = sampleOutputPath + "/test"
     fs.delete(new Path(trainOutputPath), true)
     fs.delete(new Path(testOutputPath), true)
-    samples.filter(x => train.value.contains(x.getQuery)).map(MusicFeatureUtils.convertToText(_)).repartition(1).saveAsTextFile(trainOutputPath)
-    samples.filter(x => test.value.contains(x.getQuery)).map(MusicFeatureUtils.convertToText(_)).repartition(1).saveAsTextFile(testOutputPath)
+    samples.filter(x => train.value.contains(x.getQuery)).sortBy(_.getQid, true, 1).map(MusicFeatureUtils.convertToText(_)).saveAsTextFile(trainOutputPath)
+    samples.filter(x => test.value.contains(x.getQuery)).sortBy(_.getQid, true, 1).map(MusicFeatureUtils.convertToText(_)).saveAsTextFile(testOutputPath)
 
     fs.delete(new Path(zippedQueryOutputPath), true)
     sc.makeRDD(queries.sortBy(_._2).collect().map(_.productIterator.mkString("\t")), 1).repartition(1).saveAsTextFile(zippedQueryOutputPath)

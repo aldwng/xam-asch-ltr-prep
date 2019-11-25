@@ -1,23 +1,24 @@
 package com.xiaomi.misearch.rank.music.common.model;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author Shenglan Wang
  */
-public class RankSample {
+public class RankSample implements Serializable {
 
   private MusicItem music;
 
   private String query;
 
-  private String qid;
+  private int qid;
 
   private int label;
 
   private List<Feature> features;
 
-  public RankSample(MusicItem music, String query, String qid, int label,
+  public RankSample(MusicItem music, String query, int qid, int label,
                     List<Feature> features) {
     this.music = music;
     this.query = query;
@@ -42,11 +43,11 @@ public class RankSample {
     this.query = query;
   }
 
-  public String getQid() {
+  public int getQid() {
     return qid;
   }
 
-  public void setQid(String qid) {
+  public void setQid(int qid) {
     this.qid = qid;
   }
 

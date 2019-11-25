@@ -18,8 +18,8 @@ function run {
     -load ${model} \
     -test ${test} \
     -norm zscore \
-    -gmax 6 \
-    -ranker 5 \
+    -gmax 5 \
+    -ranker 6 \
     -metric2T "$1" \
     -idv "$2"
 }

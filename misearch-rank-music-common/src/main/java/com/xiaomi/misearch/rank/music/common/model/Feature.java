@@ -1,6 +1,8 @@
 package com.xiaomi.misearch.rank.music.common.model;
 
-public class Feature {
+import java.io.Serializable;
+
+public class Feature implements Serializable {
 
   private String name;
   private int id;
