@@ -61,7 +61,7 @@ object FeatureGenerator {
           id -> item
       }
 
-    val storedArtistFeatures = artistItems.filter(_._2.getMusicCount > 0)
+    val storedArtistFeatures = artistItems.filter(_._2.getSearchCount > 0)
       .map {
         case (_, artistFeature) =>
           SerializationUtils.toJson(artistFeature)
