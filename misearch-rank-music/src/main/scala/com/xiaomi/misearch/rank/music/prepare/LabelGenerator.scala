@@ -89,13 +89,13 @@ object LabelGenerator {
     val validListenRatio = 1.0f * validListenCount / playCount
 
     var label = 0
-    if (qqRank <= 3) {
+    if (qqRank == 1) {
       label = 5
-    } else if (playCount >= 100) {
+    } else if (playCount >= 50) {
       if (finishRatio >= 0.6 || validListenRatio >= 0.8) {
-        label = 5
-      } else if ((finishRatio >= 0.4 && finishRatio < 0.6) && (validListenRatio >= 0.6 && validListenRatio < 0.8)) {
         label = 4
+      } else if ((finishRatio >= 0.4 && finishRatio < 0.6) && (validListenRatio >= 0.6 && validListenRatio < 0.8)) {
+        label = 3
       } else {
         label = 1
       }
@@ -149,6 +149,7 @@ object LabelGenerator {
         .filter(_.song != null)
         .filter(_.musicid != null)
         .filter(_.cp != null)
+        .filter(log => (isMatchField(log.song, log.songname) || isMatchField(log.song, log.songalias)))
         .map(log => extractMusicId(log) -> log)
         .filter(_._1.nonEmpty)
         .map {
@@ -173,7 +174,7 @@ object LabelGenerator {
       .filter(x => StringUtils.isNotBlank(x._2))
       .map { case (song, resourceId, isFinished, isValidListened, displaySong) => (song, resourceId, displaySong) -> (isFinished, isValidListened, 1) }
       .reduceByKey((x, y) => (x._1 + y._1, x._2 + y._2, x._3 + y._3))
-      .filter(_._2._3 >= 50)
+      .filter(_._2._3 >= 20)
       .map {
         case ((song, resourceId, displaySong), (finishCount, validListenCount, playCount)) => {
           var query = song
