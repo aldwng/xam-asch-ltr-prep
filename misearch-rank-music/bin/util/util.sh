@@ -27,6 +27,7 @@ function run {
         --conf spark.hadoop.validateOutputSpecs=false \
         --conf spark.dynamicAllocation.enabled=false \
         --conf spark.yarn.executor.memoryOverhead=3g \
+        --conf spark.driver.maxResultSize=4g \
         --conf spark.kryoserializer.buffer.max=1g \
         --conf spark.yarn.appMasterEnv.JAVA_HOME=/opt/soft/jdk1.8.0 \
         --conf spark.executorEnv.JAVA_HOME=/opt/soft/jdk1.8.0 \

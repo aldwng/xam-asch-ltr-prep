@@ -2,25 +2,31 @@ package com.xiaomi.misearch.rank.music.prepare
 
 import com.twitter.scalding.Args
 import com.xiaomi.data.commons.spark.HdfsIO._
+import com.xiaomi.data.spec.log.tv.{MaterialMusicMid, TableName}
 import com.xiaomi.data.spec.platform.misearch.SoundboxMusicSearchLog
 import com.xiaomi.misearch.rank.music.model.MusicStat
 import com.xiaomi.misearch.rank.music.utils.LogUtils._
-import com.xiaomi.misearch.rank.music.utils.Paths
+import com.xiaomi.misearch.rank.music.utils.{Paths, QQRankUtils}
 import com.xiaomi.misearch.rank.utils.PathUtils._
 import com.xiaomi.misearch.rank.utils.SerializationUtils
+import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.broadcast.Broadcast
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
 
+import scala.collection.JavaConverters._
 import scala.util.control.Breaks
 
 /**
   * @author Shenglan Wang
   */
 object LabelGenerator {
+
+  val invalidRankIdx = 1000
 
   def main(mainArgs: Array[String]): Unit = {
     val args = Args(mainArgs)
@@ -30,6 +36,7 @@ object LabelGenerator {
 
     var musicSearchLog = intermediateDateIntervalPath(Paths.SOUNDBOX_MUSIC_SEARCH_LOG, start, end)
     var qqRankPath = Paths.QQ_RANK_PATH
+    var musicIdxPath = intermediateDatePath(Paths.MATERIAL_MUSIC_INDEX_DATA, end.toInt)
 
     var musicStatOutputPath = intermediateDatePath(Paths.MUSIC_STAT_PATH, end.toInt)
     var labelOutputPath = intermediateDatePath(Paths.LABEL_PATH, end.toInt)
@@ -41,6 +48,7 @@ object LabelGenerator {
     if (dev) {
       musicSearchLog = Seq(Paths.SOUNDBOX_MUSIC_SEARCH_LOG_LOCAL)
       qqRankPath = Paths.QQ_RANK_PATH_LOCAL
+      musicIdxPath = Paths.MATERIAL_MUSIC_INDEX_DATA_LOCAL
 
       musicStatOutputPath = Paths.MUSIC_STAT_PATH_LOCAL
       labelOutputPath = Paths.LABEL_PATH_LOCAL
@@ -54,20 +62,27 @@ object LabelGenerator {
       .getOrCreate()
     val sc = spark.sparkContext
 
-    val qqRankMap = getQQRankMap(qqRankPath, spark)
-    val musicStats = analysisLog(sc, musicSearchLog, qqRankMap)
-    println("Music Stats line: " + musicStats.count())
+    val musicStats = analysisLog(sc, musicSearchLog)
 
-    val labelData = musicStats.map(x => label(x)).filter(_._3 > 0)
+    val qqRankMap = getQQRankMap(qqRankPath, spark)
+    val musicIdMap = getMusicIdMap(musicIdxPath, sc, musicStats)
+    val musicStatsFinal = musicStats.map { x =>
+      val qqRank = calcQQRank(x.getResourceId, x.getSong, x.getDisplaySong, qqRankMap, musicIdMap)
+      x.setQqRank(qqRank)
+      x
+    }
+    println("Music Stats line: " + musicStatsFinal.count())
+
+    val labelData = musicStatsFinal.map(x => label(x)).filter(_._3 > 0)
     println("Label Data count: " + labelData.count())
 
     // Music Stats
     val fs = FileSystem.get(new Configuration())
     fs.delete(new Path(musicStatOutputPath), true)
-    musicStats.map(x => SerializationUtils.toJson(x)).repartition(1).saveAsTextFile(musicStatOutputPath)
+    musicStatsFinal.map(x => SerializationUtils.toJson(x)).repartition(1).saveAsTextFile(musicStatOutputPath)
 
     fs.delete(new Path(queryOutputPath), true)
-    musicStats.map(x => x.getSong + "\t" + (if(StringUtils.isEmpty(x.getDisplaySong)) "" else x.getDisplaySong)).distinct().repartition(1).saveAsTextFile(queryOutputPath)
+    musicStatsFinal.map(x => x.getSong + "\t" + (if (StringUtils.isEmpty(x.getDisplaySong)) "" else x.getDisplaySong)).distinct().repartition(1).saveAsTextFile(queryOutputPath)
 
     // Label Data
     fs.delete(new Path(labelOutputPath), true)
@@ -112,38 +127,42 @@ object LabelGenerator {
     (song, resourceId, label)
   }
 
-  /**
-    * markInfo format: xiaowei_123456::xxx
-    *
-    * @param markInfo
-    * @return
-    */
-  def parseMarkInfo(markInfo: String) = {
-    var cp = ""
-    var musicId = ""
-
-    if (StringUtils.isNotBlank(markInfo)) {
-      val splits = markInfo.split("::")
-      if (splits.length > 0) {
-        val items = splits(0).split("_")
-        if (items.length == 2) {
-          cp = items(0)
-          musicId = items(1)
-        }
-      }
-    }
-    (cp, musicId)
-  }
-
   def getQQRankMap(qqRankPath: String, spark: SparkSession) = {
     spark.sparkContext.broadcast(spark.sparkContext.textFile(qqRankPath).map(x => {
       val items = x.split("\t")
-      items(0) -> items(1).split(",")
+      items(0) -> items(1).split("@")
     }).collectAsMap())
   }
 
-  def analysisLog(sc: SparkContext, musicSearchLog: Seq[String], qqRankMap: Broadcast[scala.collection.Map[String, Array[String]]]) = {
-    val invalidRankIdx = 1000
+  def getMusicIdMap(musicIdxPath: String, sc: SparkContext, musicStats: RDD[MusicStat]) = {
+    val musicIdsExists = sc.broadcast(musicStats.map(x => x.getResourceId -> 1).collectAsMap())
+    sc.broadcast(sc.thriftParquetFile(musicIdxPath, classOf[MaterialMusicMid])
+      .filter(_.tableName == TableName.MUSIC)
+      .map(_.musicMetaMid)
+      .filter(x => CollectionUtils.isNotEmpty(x.resources))
+      .flatMap {
+        metaMid => {
+          for (res <- metaMid.resources.asScala) yield {
+            val singerNames = StringUtils.split(res.originSinger, ";").toList.asJava
+            res.cpSongId -> QQRankUtils.createMusicBasicInfo(res.cpSongId, res.originAlbumName, singerNames)
+          }
+        }
+      }.filter(x => musicIdsExists.value.contains(x._1)).collectAsMap())
+  }
+
+  def parseMusicBasicInfo(musicBasicInfo: String) = {
+    val splits = musicBasicInfo.split("#")
+    if (splits.length == 3) {
+      val resId = splits(0)
+      val album = splits(1)
+      val singer = splits(2)
+      (resId, album, singer)
+    } else {
+      ("", "", "")
+    }
+  }
+
+  def analysisLog(sc: SparkContext, musicSearchLog: Seq[String]) = {
     sc.union(musicSearchLog.map { p =>
       sc.thriftParquetFile(p, classOf[SoundboxMusicSearchLog])
         .filter(_.song != null)
@@ -176,30 +195,45 @@ object LabelGenerator {
       .reduceByKey((x, y) => (x._1 + y._1, x._2 + y._2, x._3 + y._3))
       .filter(_._2._3 >= 20)
       .map {
-        case ((song, resourceId, displaySong), (finishCount, validListenCount, playCount)) => {
-          var query = song
-          if (StringUtils.isNotBlank(displaySong)) {
-            query = displaySong
-          }
-          val musicIds = qqRankMap.value.getOrElse(query, Array())
-          var rank = 0
-          if (musicIds.contains(resourceId)) {
-            val loop = new Breaks;
-            loop.breakable {
-              for (musicId <- musicIds) {
-                rank += 1
-                if (resourceId.equals(musicId)) {
-                  loop.break()
-                }
-              }
-            }
-          }
-
-          if (rank == 0) {
-            rank = invalidRankIdx
-          }
-          new MusicStat(song, resourceId, finishCount, playCount, validListenCount, displaySong, rank)
+        case ((song, resId, displaySong), (finishCount, validListenCount, playCount)) => {
+          new MusicStat(song, resId, finishCount, playCount, validListenCount, displaySong, invalidRankIdx)
         }
       }
   }
+
+  def calcQQRank(resId: String, song: String, displaySong: String, qqRankMap: Broadcast[scala.collection.Map[String, Array[String]]], musicIdMap: Broadcast[scala.collection.Map[String, String]]) = {
+    var query = song
+    if (StringUtils.isNotBlank(displaySong)) {
+      query = displaySong
+    }
+
+    val musicBasicInfo = musicIdMap.value.getOrElse(resId, "")
+    val tuple = parseMusicBasicInfo(musicBasicInfo)
+    val album = tuple._2
+    val singer = tuple._3
+
+    val musicBasicInfoArr = qqRankMap.value.getOrElse(query, Array())
+    var rank = 0
+    val loop = new Breaks;
+    loop.breakable {
+      for (item <- musicBasicInfoArr) {
+        rank += 1
+        val compareToTuple = parseMusicBasicInfo(item)
+        val compareToResId = compareToTuple._1
+        val compareToAlbum = compareToTuple._2
+        val compareToSinger = compareToTuple._3
+        if (resId.equals(compareToResId)) {
+          loop.break()
+        } else if ((StringUtils.isNoneBlank(compareToAlbum) || StringUtils.isNoneBlank(compareToSinger)) && (compareToAlbum.equals(album) && compareToSinger.equals(singer))) {
+          loop.break()
+        }
+      }
+    }
+
+    if (rank == 0) {
+      rank = invalidRankIdx
+    }
+    rank
+  }
+
 }

@@ -30,6 +30,7 @@ object Paths {
   val SAMPLE_PATH_LOCAL = BASE_DIR_LOCAL + "/sample"
 
   val MATERIAL_MUSIC_INDEX_DATA = "/user/h_data_platform/platform/aiservice/ai_service_music_idx"
+  val MATERIAL_MUSIC_INDEX_DATA_LOCAL = BASE_DIR_LOCAL + "/music_idx"
 
   val SOUNDBOX_SONG_ARTIST_PAIR = "/user/h_misearch/ai/music/table/soundbox_search/feedback_song_artist_pair"
 

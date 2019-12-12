@@ -2,6 +2,7 @@ package com.xiaomi.misearch.rank.music.prepare;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,6 +14,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.lang3.StringUtils;
 
 import com.xiaomi.misearch.rank.music.utils.Paths;
+import com.xiaomi.misearch.rank.music.utils.QQRankUtils;
 import com.xiaomi.misearch.rank.utils.SerializationUtils;
 import com.xiaomi.misearch.rank.utils.hdfs.HdfsAccessor;
 
@@ -32,6 +34,17 @@ public class QQRankFetcher {
   public static class QQRankItem {
 
     private String song_id;
+    private String album_name;
+    private String singer_name;
+    private List<Singer> other_singer_list;
+
+  }
+
+  @Data
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public static class Singer {
+
+    private String singer_name;
   }
 
   @Data
@@ -61,10 +74,18 @@ public class QQRankFetcher {
       if (qqRankList == null || CollectionUtils.isEmpty(qqRankList.getList())) {
         return null;
       }
-      List<String>
-          songIds =
-          qqRankList.getList().stream().map(x -> "xiaowei_" + x.getSong_id()).limit(10).collect(Collectors.toList());
-      return new StringBuilder(q).append("\t").append(StringUtils.join(songIds.toArray(), ",")).toString();
+      List<String> songInfo = qqRankList.getList().stream().map(x -> {
+        String albumName = x.getAlbum_name();
+        List<String> singerNames = new LinkedList<>();
+        singerNames.add(x.getSinger_name());
+        if (CollectionUtils.isNotEmpty(x.getOther_singer_list())) {
+          for (Singer singer : x.getOther_singer_list()) {
+            singerNames.add(singer.getSinger_name());
+          }
+        }
+        return QQRankUtils.createMusicBasicInfo("xiaowei_" + x.getSong_id(), albumName, singerNames);
+      }).limit(10).collect(Collectors.toList());
+      return new StringBuilder(q).append("\t").append(StringUtils.join(songInfo.toArray(), "@")).toString();
     }).filter(StringUtils::isNotBlank).collect(Collectors.toList());
     hdfsAccessor.writeLines(qqRankPath, resultLines);
   }
@@ -89,6 +110,8 @@ public class QQRankFetcher {
   private static QQRankList getQQRankList(String query) {
     try {
       String url = String.format(QQ_SEARCH_URL_PATTERN, URLEncoder.encode(query, "UTF-8"));
+      System.out.println("query: " + query);
+      System.out.println("url: " + url);
       GetMethod get = new GetMethod(url);
       get.getParams().setParameter("http.protocol.content-charset", "UTF-8");
       int status = httpClient.executeMethod(get);
