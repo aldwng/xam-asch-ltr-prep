@@ -53,4 +53,12 @@ object LogUtils {
       if (idFromMark != null) idFromMark else idFromLog
     }
   }
+
+  def isFinish30s(log: SoundboxMusicSearchLog): Boolean = {
+    val time = log.endtime - log.starttime
+    if (time > 30 && time < 600) {
+      return true
+    }
+    false
+  }
 }

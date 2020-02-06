@@ -397,7 +397,7 @@
             <dependency>
                 <groupId>com.xiaomi.misearch</groupId>
                 <artifactId>misearch-rank-music-common</artifactId>
-                <version>0.0.4-SNAPSHOT</version>
+                <version>0.0.6-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

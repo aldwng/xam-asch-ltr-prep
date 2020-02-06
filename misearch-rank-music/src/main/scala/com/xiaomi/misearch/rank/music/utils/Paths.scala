@@ -45,4 +45,12 @@ object Paths {
 
   val SOUNDBOX_MUSIC_TAG_INDEX = BASE_DIR + "/music_tag_index"
   val SOUNDBOX_MUSIC_TAG_INDEX_LOCAL = BASE_DIR_LOCAL + "/music_tag_index"
+
+  val ARTIST_BASE_DIR = "/user/h_misearch/ai/music/lambdamart_artist"
+
+  val ARTIST_SAMPLE_PATH = ARTIST_BASE_DIR + "/sample"
+
+  val STORED_QUERY_STATS = ARTIST_BASE_DIR + "/stored_feature/query"
+
+  val STORED_STATS_ITEMS = ARTIST_BASE_DIR + "/stored_feature/stats"
 }
