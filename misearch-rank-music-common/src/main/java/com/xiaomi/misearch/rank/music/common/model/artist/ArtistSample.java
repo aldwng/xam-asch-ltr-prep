@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import com.xiaomi.misearch.rank.music.common.model.Feature;
 
 @Data
-@AllArgsConstructor;
+@AllArgsConstructor
 public class ArtistSample implements Serializable {
 
   private String query;
