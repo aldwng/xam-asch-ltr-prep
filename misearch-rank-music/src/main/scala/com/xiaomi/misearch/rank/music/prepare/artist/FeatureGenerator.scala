@@ -176,7 +176,7 @@ object FeatureGenerator {
 
   private def isValidQueryStatsScenario(log: SoundboxMusicSearchLog): Boolean = {
     log.found &&
-      (log.song != null && log.artist == null || !log.artist.contains(";") && log.album == null && log.tag == null && (log.artist == null || !log.artist.contains(";")))
+      (log.song != null && log.album == null && log.tag == null && (log.artist == null || !log.artist.contains(";")))
   }
 
   private def isValidMusicStatsScenario(log: SoundboxMusicSearchLog): Boolean = {
