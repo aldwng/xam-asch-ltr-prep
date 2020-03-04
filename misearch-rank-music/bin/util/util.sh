@@ -18,7 +18,7 @@ function run {
         --cluster zjyprc-hadoop-spark2.1 \
         --class "$1" \
         --master yarn-cluster \
-        --queue service.cloud_group.sns.search_rec \
+        --queue service.bigdata_group.gsearch.aiot_search_rec \
         --num-executors 100 \
         --driver-memory 10g \
         --executor-memory 10g \
