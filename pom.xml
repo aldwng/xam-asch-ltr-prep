@@ -79,7 +79,7 @@
         <scala.version.major>2.11</scala.version.major>
         <scala.version.minor>8</scala.version.minor>
         <apache.parquet.version>1.9.0</apache.parquet.version>
-        <log4j2.version>2.11.0</log4j2.version>
+        <log4j2.version>2.17.0</log4j2.version>
     </properties>
 
     <dependencyManagement>
