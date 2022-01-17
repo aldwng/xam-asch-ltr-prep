@@ -31,6 +31,12 @@
         <dependency>
             <groupId>com.xiaomi.data</groupId>
             <artifactId>commons-spark_${scala.version.major}</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>fastjson</artifactId>
+                    <groupId>com.alibaba</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

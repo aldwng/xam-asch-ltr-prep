@@ -134,6 +134,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.xiaomi.data</groupId>
+            <artifactId>data-platform-spec-tv</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.xiaomi.misearch</groupId>
             <artifactId>misearch-rank-music-common</artifactId>
         </dependency>
