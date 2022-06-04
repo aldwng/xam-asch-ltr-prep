@@ -2,10 +2,13 @@ package com.xiaomi.misearch.rank.music.prepare.artist
 
 import com.xiaomi.data.commons.spark.HdfsIO._
 import com.xiaomi.data.spec.log.tv.{MaterialMusicMid, TableName}
-import com.xiaomi.data.spec.platform.misearch.SoundboxMusicSearchLog
+import com.xiaomi.data.spec.platform.misearch.{AiContentFrontBackLog, SoundboxMusicSearchLog}
 import com.xiaomi.misearch.rank.music.common.model.artist.{ArtistMusicItem, ArtistStoredQueryItem}
+import com.xiaomi.misearch.rank.music.utils.LogConstants.{PROP_CONTENT_IS_FOUND, PROP_INTENTION_ALBUM, PROP_INTENTION_ARTIST, PROP_INTENTION_SONG, PROP_INTENTION_TAG}
 import com.xiaomi.misearch.rank.music.utils.LogUtils._
 import com.xiaomi.misearch.rank.music.utils.Paths._
+import com.xiaomi.misearch.rank.utils.GsonUtils.{getIntProp, getJsonObject, getStrProp}
+import org.apache.commons.lang3.StringUtils
 import org.apache.spark.SparkContext
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
@@ -193,6 +196,48 @@ object FeatureGenerator {
       true
     }
   }
+
+  private def isValidForQueryStats(log: AiContentFrontBackLog): Boolean = {
+    val cObj = getJsonObject(log.getContent)
+    val iObj = getJsonObject(log.getIntention)
+    if (cObj == null || iObj == null) {
+      return false
+    }
+    val isFound = getIntProp(cObj, PROP_CONTENT_IS_FOUND) == 1
+    val song = getStrProp(iObj, PROP_INTENTION_SONG)
+    val album = getStrProp(iObj, PROP_INTENTION_ALBUM)
+    val tag = getStrProp(iObj, PROP_INTENTION_TAG)
+    val artist = getStrProp(iObj, PROP_INTENTION_ARTIST)
+    isFound && (StringUtils.isNotBlank(song) && StringUtils.isBlank(album) && StringUtils.isBlank(tag) &&
+      (StringUtils.isBlank(artist) || !artist.contains(";")))
+  }
+
+//  private def isValidForMusicStats(log: AiContentFrontBackLog): Boolean = {
+//    val cObj = getJsonObject(log.getContent)
+//    val iObj = getJsonObject(log.getIntention)
+//    if (cObj == null || iObj == null) {
+//      return false
+//    }
+//    val isFound = getIntProp(cObj, PROP_CONTENT_IS_FOUND) == 1
+//    val song = getStrProp(iObj, PROP_INTENTION_SONG)
+//    val album = getStrProp(iObj, PROP_INTENTION_ALBUM)
+//    val tag = getStrProp(iObj, PROP_INTENTION_TAG)
+//    val artist = getStrProp(iObj, PROP_INTENTION_ARTIST)
+//
+//    val isValidQuery = isFound &&
+//      StringUtils.isBlank(album) && StringUtils.isBlank(tag) && (StringUtils.isNotBlank(song) ||
+//      (StringUtils.isNotBlank(artist) && !artist.contains(";")))
+//    if (!isValidQuery) {
+//      return false
+//    }
+//    if (StringUtils.isNotBlank(song) && StringUtils.isBlank(artist)) {
+//      isMatchField(song, log.songname) || isMatchField(log.song, log.songalias)
+//    } else if (log.song != null && log.artist != null) {
+//      log.offset == 0
+//    } else {
+//      true
+//    }
+//  }
 
   private def getSingleRequestMusicStats(log: SoundboxMusicSearchLog):
   ((Int, Int, Int), (Int, Int, Int), (Int, Int, Int)) = {

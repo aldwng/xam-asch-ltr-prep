@@ -9,6 +9,7 @@ object Paths {
   val BASE_DIR_LOCAL = "/tmp/music"
 
   val SOUNDBOX_MUSIC_SEARCH_LOG = "/user/h_data_platform/platform/misearch/soundbox_music_search_log"
+  val AI_CONTENT_FRONT_BACK_LOG = "/user/h_data_platform/platform/misearch/ai_content_front_back_log"
   val SOUNDBOX_MUSIC_SEARCH_LOG_LOCAL = BASE_DIR_LOCAL + "/search_log"
 
   val MUSIC_STAT_PATH = BASE_DIR + "/music_stat"
