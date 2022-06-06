@@ -21,7 +21,7 @@ object SampleGenerator {
     val sparkConf = new SparkConf().setAppName(this.getClass.getName)
     val sparkContext = new SparkContext(sparkConf)
 
-    var musicsWithStats = generateMusicStatsFeature(sparkContext)
+    var musicsWithStats = genStatsFeatures(sparkContext)
 
     val musicIdSet = sparkContext.broadcast(musicsWithStats.map(_._1).collect().toSet)
 
@@ -29,7 +29,7 @@ object SampleGenerator {
 
     musicsWithStats = addMusicInfoToMusicItems(musicsWithStats, musicInfoMap)
 
-    val queryStats = generateQueryStatsFeature(sparkContext)
+    val queryStats = genQueryStatsFeatures(sparkContext)
     val queryStatsMap = sparkContext.broadcast(queryStats.collectAsMap())
 
     musicsWithStats = addQueryStatsToMusicItems(musicsWithStats, queryStatsMap)

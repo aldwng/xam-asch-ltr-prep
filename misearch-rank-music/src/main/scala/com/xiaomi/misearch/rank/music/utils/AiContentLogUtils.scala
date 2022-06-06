@@ -2,6 +2,8 @@ package com.xiaomi.misearch.rank.music.utils
 
 import com.google.gson.{JsonArray, JsonObject}
 import com.xiaomi.data.spec.platform.misearch.{AiContentFrontBackLog, PlayInfoLog}
+import com.xiaomi.misearch.rank.music.utils.LogConstants._
+import com.xiaomi.misearch.rank.utils.GsonUtils._
 import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang.StringUtils
 

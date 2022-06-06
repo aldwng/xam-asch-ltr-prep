@@ -224,7 +224,7 @@ object LabelGenerator {
         val compareToSinger = compareToTuple._3
         if (resId.equals(compareToResId)) {
           loop.break()
-        } else if ((StringUtils.isNoneBlank(compareToAlbum) || StringUtils.isNoneBlank(compareToSinger)) && (compareToAlbum.equals(album) && compareToSinger.equals(singer))) {
+        } else if ((StringUtils.isNotBlank(compareToAlbum) || StringUtils.isNotBlank(compareToSinger)) && (compareToAlbum.equals(album) && compareToSinger.equals(singer))) {
           loop.break()
         }
       }

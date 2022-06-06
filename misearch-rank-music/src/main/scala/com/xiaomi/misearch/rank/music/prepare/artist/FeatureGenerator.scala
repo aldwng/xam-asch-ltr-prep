@@ -1,13 +1,16 @@
 package com.xiaomi.misearch.rank.music.prepare.artist
 
+import com.google.gson.JsonObject
 import com.xiaomi.data.commons.spark.HdfsIO._
 import com.xiaomi.data.spec.log.tv.{MaterialMusicMid, TableName}
-import com.xiaomi.data.spec.platform.misearch.{AiContentFrontBackLog, SoundboxMusicSearchLog}
+import com.xiaomi.data.spec.platform.misearch.{AiContentFrontBackLog, PlayInfoLog, SoundboxMusicSearchLog}
 import com.xiaomi.misearch.rank.music.common.model.artist.{ArtistMusicItem, ArtistStoredQueryItem}
+import com.xiaomi.misearch.rank.music.utils.AiContentLogUtils.{getCertainMusic, getMusicArray, getMusicObj, isEffectiveMusicLog}
 import com.xiaomi.misearch.rank.music.utils.LogConstants.{PROP_CONTENT_IS_FOUND, PROP_INTENTION_ALBUM, PROP_INTENTION_ARTIST, PROP_INTENTION_SONG, PROP_INTENTION_TAG}
 import com.xiaomi.misearch.rank.music.utils.LogUtils._
 import com.xiaomi.misearch.rank.music.utils.Paths._
-import com.xiaomi.misearch.rank.utils.GsonUtils.{getIntProp, getJsonObject, getStrProp}
+import com.xiaomi.misearch.rank.utils.GsonUtils.{getIntProp, getJsonObject, getStrProp, isNotEmpty}
+import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.SparkContext
 import org.apache.spark.broadcast.Broadcast
@@ -56,6 +59,56 @@ object FeatureGenerator {
       }
   }
 
+  def genStatsFeatures(sc: SparkContext): RDD[(String, ArtistMusicItem)] = {
+    val dateTime = new DateTime()
+    sc.union(Range(1, 14).map {
+      i => {
+        val logPath = AI_CONTENT_FRONT_BACK_LOG + "/date=" + dateTime.minusDays(i).toString("yyyyMMdd")
+        val singleLogQueryStats = sc.thriftParquetFile(logPath, classOf[AiContentFrontBackLog])
+          .filter(log => isEffectiveMusicLog(log))
+          .flatMap {
+            log => {
+              val iObj = getJsonObject(log.getIntention)
+              val cObj = getJsonObject(log.getContent)
+              val musicArr = getMusicArray(cObj)
+              val fl = new ListBuffer[((String, String), (Int, Int, Int, Int, Int, Int, Int, Int, Int))]
+              if (CollectionUtils.isNotEmpty(log.getPlayInfoLog) && isNotEmpty(musicArr)) {
+                log.getPlayInfoLog.asScala.foreach(pil => {
+                  val musicObj = getCertainMusic(musicArr, pil.getResid)
+                  if (isValidForMusicStats(iObj, cObj, musicObj, pil)) {
+                    val tupleStats = getSingleRequestMusicStats(pil, iObj)
+                    fl.append((extractMusicId(pil, musicObj), log.getRequestid) ->
+                      (tupleStats._1._1, tupleStats._1._2, tupleStats._1._3, tupleStats._2._1, tupleStats._2._2,
+                        tupleStats._2._3, tupleStats._3._1, tupleStats._3._2, tupleStats._3._3))
+                  }
+                })
+              }
+              fl
+            }
+          }
+          .reduceByKey((o1, o2) => (o1._1 + o2._1, o1._2 + o2._2, o1._3 + o2._3, o1._4 + o2._4, o1._5 + o2._5,
+            o1._6 + o2._6, o1._7 + o2._7, o1._8 + o2._8, o1._9 + o2._9))
+          .map {
+            case ((id, _), (c11, c12, c13, c21, c22, c23, c31, c32, c33)) =>
+              id -> (getCountByCondition(c11), getCountByCondition(c12), getCountByCondition(c13),
+                getCountByCondition(c21), getCountByCondition(c22), getCountByCondition(c23),
+                getCountByCondition(c31), getCountByCondition(c32), getCountByCondition(c33))
+          }
+          .reduceByKey((o1, o2) => (o1._1 + o2._1, o1._2 + o2._2, o1._3 + o2._3, o1._4 + o2._4, o1._5 + o2._5,
+            o1._6 + o2._6, o1._7 + o2._7, o1._8 + o2._8, o1._9 + o2._9))
+        singleLogQueryStats
+      }
+    })
+      .reduceByKey((o1, o2) => (o1._1 + o2._1, o1._2 + o2._2, o1._3 + o2._3, o1._4 + o2._4, o1._5 + o2._5,
+        o1._6 + o2._6, o1._7 + o2._7, o1._8 + o2._8, o1._9 + o2._9))
+      .filter(e => e._2._1 > 10 || e._2._4 > 10 || e._2._7 > 10)
+      .map {
+        case (id, (c11, c12, c13, c21, c22, c23, c31, c32, c33)) =>
+          id -> new ArtistMusicItem(id, c11, c12, c13, c21, c22, c23, c31, c32, c33)
+      }
+      .filter(x => x._2.getSongSearchPlayCount > 3 || x._2.getSongArtistSearchPlayCount > 3)
+  }
+
   def generateQueryStatsFeature(sc: SparkContext): RDD[((String, String), Long)] = {
     val dateTime = new DateTime()
     sc.union(Range(1, 14).map {
@@ -86,6 +139,42 @@ object FeatureGenerator {
       }
     })
       .reduceByKey(_ + _)
+  }
+
+  def genQueryStatsFeatures(sc: SparkContext): RDD[((String, String), Long)] = {
+    val dateTime = new DateTime()
+    sc.union(Range(1, 14).map {
+      i => {
+        val logPath = AI_CONTENT_FRONT_BACK_LOG + "/date=" + dateTime.minusDays(i).toString("yyyyMMdd")
+        val singleLogQueryStats = sc.thriftParquetFile(logPath, classOf[AiContentFrontBackLog])
+          .filter(log => isEffectiveMusicLog(log) && isValidForQueryStats(log))
+          .map {
+            log => {
+              val iObj = getJsonObject(log.getIntention)
+              val song = getStrProp(iObj, PROP_INTENTION_SONG)
+              val artist = getStrProp(iObj, PROP_INTENTION_ARTIST)
+              (song, artist, log.getRequestid) -> 1L
+            }
+          }
+          .reduceByKey(_ + _)
+          .flatMap {
+            case ((song, artist, _), _) =>
+              val qList = ListBuffer[((String, String), Long)]()
+              if (artist != null && artist.contains("|")) {
+                artist.split("\\|").foreach(singer => {
+                  qList.append((song, singer) -> 1L)
+                })
+              } else {
+                qList.append((song, artist) -> 1L)
+              }
+              qList
+          }
+          .reduceByKey(_ + _)
+        singleLogQueryStats
+      }
+    })
+      .reduceByKey(_ + _)
+      .filter(_._2 > 3)
   }
 
   def getMusicDataInfo(sc: SparkContext, idSet: Broadcast[scala.collection.immutable.Set[String]]):
@@ -212,32 +301,33 @@ object FeatureGenerator {
       (StringUtils.isBlank(artist) || !artist.contains(";")))
   }
 
-//  private def isValidForMusicStats(log: AiContentFrontBackLog): Boolean = {
-//    val cObj = getJsonObject(log.getContent)
-//    val iObj = getJsonObject(log.getIntention)
-//    if (cObj == null || iObj == null) {
-//      return false
-//    }
-//    val isFound = getIntProp(cObj, PROP_CONTENT_IS_FOUND) == 1
-//    val song = getStrProp(iObj, PROP_INTENTION_SONG)
-//    val album = getStrProp(iObj, PROP_INTENTION_ALBUM)
-//    val tag = getStrProp(iObj, PROP_INTENTION_TAG)
-//    val artist = getStrProp(iObj, PROP_INTENTION_ARTIST)
-//
-//    val isValidQuery = isFound &&
-//      StringUtils.isBlank(album) && StringUtils.isBlank(tag) && (StringUtils.isNotBlank(song) ||
-//      (StringUtils.isNotBlank(artist) && !artist.contains(";")))
-//    if (!isValidQuery) {
-//      return false
-//    }
-//    if (StringUtils.isNotBlank(song) && StringUtils.isBlank(artist)) {
-//      isMatchField(song, log.songname) || isMatchField(log.song, log.songalias)
-//    } else if (log.song != null && log.artist != null) {
-//      log.offset == 0
-//    } else {
-//      true
-//    }
-//  }
+  private def isValidForMusicStats(iObj: JsonObject, cObj: JsonObject, musicObj: JsonObject, piLog: PlayInfoLog):
+  Boolean = {
+    if (musicObj == null || piLog == null || iObj == null || cObj == null) {
+      return false
+    }
+    val isFound = getIntProp(cObj, PROP_CONTENT_IS_FOUND) == 1
+    val song = getStrProp(iObj, PROP_INTENTION_SONG)
+    val album = getStrProp(iObj, PROP_INTENTION_ALBUM)
+    val tag = getStrProp(iObj, PROP_INTENTION_TAG)
+    val artist = getStrProp(iObj, PROP_INTENTION_ARTIST)
+
+    val isValidQuery = isFound &&
+      StringUtils.isBlank(album) && StringUtils.isBlank(tag) && (StringUtils.isNotBlank(song) ||
+      (StringUtils.isNotBlank(artist) && !artist.contains(";")))
+    if (!isValidQuery) {
+      return false
+    }
+    val songName = getStrProp(musicObj, "song")
+    val songAlias = getStrProp(musicObj, "songAlias")
+    if (StringUtils.isNotBlank(song) && StringUtils.isBlank(artist)) {
+      isMatchField(song, songName) || isMatchField(song, songAlias)
+    } else if (StringUtils.isNotBlank(song) && StringUtils.isNotBlank(artist)) {
+      piLog.getOffset == 0
+    } else {
+      true
+    }
+  }
 
   private def getSingleRequestMusicStats(log: SoundboxMusicSearchLog):
   ((Int, Int, Int), (Int, Int, Int), (Int, Int, Int)) = {
@@ -248,6 +338,23 @@ object FeatureGenerator {
     if (log.song != null && log.artist == null) {
       (requestStats, emptyStats, emptyStats)
     } else if (log.song != null && log.artist != null) {
+      (emptyStats, requestStats, emptyStats)
+    } else {
+      (emptyStats, emptyStats, requestStats)
+    }
+  }
+
+  private def getSingleRequestMusicStats(piLog: PlayInfoLog, iObj: JsonObject):
+  ((Int, Int, Int), (Int, Int, Int), (Int, Int, Int)) = {
+    val finishCount = if ("autoswitch" == piLog.getSwitchtype) 1 else 0
+    val finish30sCount = if (isFinish30s(piLog)) 1 else 0
+    val requestStats = (1, finishCount, finish30sCount)
+    val emptyStats = (0, 0, 0)
+    val song = getStrProp(iObj, PROP_INTENTION_SONG)
+    val artist = getStrProp(iObj, PROP_INTENTION_ARTIST)
+    if (StringUtils.isNotBlank(song) && StringUtils.isBlank(artist)) {
+      (requestStats, emptyStats, emptyStats)
+    } else if (StringUtils.isNotBlank(song) && StringUtils.isNotBlank(artist)) {
       (emptyStats, requestStats, emptyStats)
     } else {
       (emptyStats, emptyStats, requestStats)

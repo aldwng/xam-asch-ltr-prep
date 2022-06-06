@@ -1,6 +1,8 @@
 package com.xiaomi.misearch.rank.music.utils
 
-import com.xiaomi.data.spec.platform.misearch.SoundboxMusicSearchLog
+import com.google.gson.JsonObject
+import com.xiaomi.data.spec.platform.misearch.{PlayInfoLog, SoundboxMusicSearchLog}
+import com.xiaomi.misearch.rank.music.utils.AiContentLogUtils.getMusicProp
 
 object LogUtils {
 
@@ -54,8 +56,29 @@ object LogUtils {
     }
   }
 
+  def extractMusicId(piLog: PlayInfoLog, mObj: JsonObject): String = {
+    val musicId = piLog.getResid
+    val cp = piLog.getCp
+
+    val idFromLog = combineIdAndCp(musicId, cp)
+    val idFromMark = getIdFromMarkInfo(getMusicProp(mObj, "markInfo"))
+    if (idFromMark == null && idFromLog == null) {
+      ""
+    } else {
+      if (idFromMark != null) idFromMark else idFromLog
+    }
+  }
+
   def isFinish30s(log: SoundboxMusicSearchLog): Boolean = {
     val time = log.endtime - log.starttime
+    if (time > 30 && time < 600) {
+      return true
+    }
+    false
+  }
+
+  def isFinish30s(piLog: PlayInfoLog): Boolean = {
+    val time = piLog.getEndtime - piLog.getStartime
     if (time > 30 && time < 600) {
       return true
     }
