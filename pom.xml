@@ -2,26 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.xiaomi.misearch</groupId>
-    <artifactId>misearch-rank</artifactId>
-    <version>0.0.4-SNAPSHOT</version>
+    <groupId>net.ald.xam</groupId>
+    <artifactId>asch.ltr.prep</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Misearch Rank Project</name>
+    <name>XAM-ASch LambdaMart Prep</name>
 
     <modules>
-        <module>misearch-rank-appstore</module>
-        <module>misearch-rank-appstore-common</module>
-        <module>misearch-rank-music-common</module>
-        <module>misearch-rank-music</module>
-        <module>misearch-rank-utils</module>
+        <module>asch-ltr-prep-common</module>
+        <module>asch-ltr-prep-run</module>
     </modules>
-
-    <scm>
-        <developerConnection>
-            scm:git:git@v9.git.n.xiaomi.com:misearch/misearch-rank.git
-        </developerConnection>
-        <tag>HEAD</tag>
-    </scm>
 
     <dependencies>
         <dependency>
@@ -65,12 +55,12 @@
         <repository>
             <id>archiva.internal</id>
             <name>Internal Release Repository</name>
-            <url>http://nexus.d.xiaomi.net/nexus/content/repositories/releases/</url>
+            <url>http://pkmd.net/nexus/content/repositories/releases/</url>
         </repository>
         <snapshotRepository>
             <id>archiva.snapshots</id>
             <name>Internal Snapshot Repository</name>
-            <url>http://nexus.d.xiaomi.net/nexus/content/repositories/snapshots/</url>
+            <url>http://pkmd.net/nexus/content/repositories/snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -84,46 +74,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.xiaomi.misearch</groupId>
-                <artifactId>misearch-rank-appstore-common</artifactId>
-                <version>0.0.4-SNAPSHOT</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.xiaomi.misearch</groupId>
-                <artifactId>misearch-rank-utils</artifactId>
-                <version>0.0.4-SNAPSHOT</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.xiaomi.data</groupId>
-                <artifactId>data-platform-spec-miuiads</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>thrift</artifactId>
-                        <groupId>org.apache.thrift</groupId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>com.xiaomi.data</groupId>
-                <artifactId>commons-spark_${scala.version.major}</artifactId>
-                <version>0.17.5.3</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>protobuf-java</artifactId>
-                        <groupId>com.google.protobuf</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>libthrift</artifactId>
-                        <groupId>org.apache.thrift</groupId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
@@ -304,55 +254,9 @@
             </dependency>
 
             <dependency>
-                <groupId>com.xiaomi.misearch</groupId>
-                <artifactId>appsearch-thrift</artifactId>
-                <version>1.0.0</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>slf4j-api</artifactId>
-                        <groupId>org.slf4j</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.thrift</groupId>
-                        <artifactId>thrift</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.xiaomi</groupId>
-                <artifactId>xiaomi-common-thrift</artifactId>
-                <version>2.8.5</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.hadoop.zookeeper</groupId>
-                        <artifactId>zookeeper</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.zookeeper</groupId>
-                        <artifactId>zookeeper</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.jboss.netty</groupId>
-                        <artifactId>netty</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>log4j</groupId>
-                        <artifactId>log4j</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-client</artifactId>
-                <version>2.6.0-mdh3.12.4-jre8</version>
+                <version>3.3.2</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
@@ -382,23 +286,6 @@
                 <version>4.5.10</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.xiaomi.data</groupId>
-                <artifactId>data-platform-spec-misearch</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.xiaomi.data</groupId>
-                <artifactId>data-platform-spec-aiservice</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.xiaomi.misearch</groupId>
-                <artifactId>misearch-rank-music-common</artifactId>
-                <version>0.0.6-SNAPSHOT</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 

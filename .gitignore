@@ -3,3 +3,4 @@ target
 *.iml
 src/main/generated-sources/
 *.zip
+dependency-redyced-pom*
